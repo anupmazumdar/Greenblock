@@ -1,0 +1,30 @@
+{
+  "materials": [
+    { "id": 1, "name": "OPC Cement", "kgco2_per_kg": 0.82, "category": "Binding", "alternative": "Fly-ash Cement", "alt_kgco2": 0.15 },
+    { "id": 2, "name": "Fly-ash Cement", "kgco2_per_kg": 0.15, "category": "Binding", "alternative": null, "alt_kgco2": null },
+    { "id": 3, "name": "Structural Steel", "kgco2_per_kg": 1.46, "category": "Metal", "alternative": "Recycled Steel", "alt_kgco2": 0.44 },
+    { "id": 4, "name": "Recycled Steel", "kgco2_per_kg": 0.44, "category": "Metal", "alternative": null, "alt_kgco2": null },
+    { "id": 5, "name": "Aluminium", "kgco2_per_kg": 8.24, "category": "Metal", "alternative": "Recycled Aluminium", "alt_kgco2": 0.92 },
+    { "id": 6, "name": "Recycled Aluminium", "kgco2_per_kg": 0.92, "category": "Metal", "alternative": null, "alt_kgco2": null },
+    { "id": 7, "name": "Red Clay Brick", "kgco2_per_kg": 0.24, "category": "Masonry", "alternative": "Fly-ash Brick", "alt_kgco2": 0.08 },
+    { "id": 8, "name": "Fly-ash Brick", "kgco2_per_kg": 0.08, "category": "Masonry", "alternative": null, "alt_kgco2": null },
+    { "id": 9, "name": "AAC Block", "kgco2_per_kg": 0.42, "category": "Masonry", "alternative": null, "alt_kgco2": null },
+    { "id": 10, "name": "Float Glass", "kgco2_per_kg": 0.85, "category": "Glazing", "alternative": null, "alt_kgco2": null },
+    { "id": 11, "name": "Ceramic Tile", "kgco2_per_kg": 0.65, "category": "Finishing", "alternative": null, "alt_kgco2": null },
+    { "id": 12, "name": "Timber (Virgin)", "kgco2_per_kg": 0.42, "category": "Wood", "alternative": "Reclaimed Timber", "alt_kgco2": 0.05 },
+    { "id": 13, "name": "Reclaimed Timber", "kgco2_per_kg": 0.05, "category": "Wood", "alternative": null, "alt_kgco2": null },
+    { "id": 14, "name": "Plywood", "kgco2_per_kg": 0.81, "category": "Wood", "alternative": "Reclaimed Timber", "alt_kgco2": 0.05 },
+    { "id": 15, "name": "River Sand", "kgco2_per_kg": 0.01, "category": "Aggregate", "alternative": null, "alt_kgco2": null },
+    { "id": 16, "name": "M-Sand (Manufactured)", "kgco2_per_kg": 0.02, "category": "Aggregate", "alternative": null, "alt_kgco2": null },
+    { "id": 17, "name": "Coarse Aggregate", "kgco2_per_kg": 0.04, "category": "Aggregate", "alternative": null, "alt_kgco2": null },
+    { "id": 18, "name": "PVC Pipe", "kgco2_per_kg": 2.41, "category": "Plumbing", "alternative": "CPVC Pipe", "alt_kgco2": 1.80 },
+    { "id": 19, "name": "CPVC Pipe", "kgco2_per_kg": 1.80, "category": "Plumbing", "alternative": null, "alt_kgco2": null },
+    { "id": 20, "name": "Copper Wire", "kgco2_per_kg": 3.81, "category": "Electrical", "alternative": null, "alt_kgco2": null },
+    { "id": 21, "name": "Gypsum Board", "kgco2_per_kg": 0.39, "category": "Finishing", "alternative": null, "alt_kgco2": null },
+    { "id": 22, "name": "Lime Plaster", "kgco2_per_kg": 0.18, "category": "Finishing", "alternative": null, "alt_kgco2": null },
+    { "id": 23, "name": "Granite", "kgco2_per_kg": 0.70, "category": "Stone", "alternative": "Lime Plaster", "alt_kgco2": 0.18 },
+    { "id": 24, "name": "Marble", "kgco2_per_kg": 0.75, "category": "Stone", "alternative": null, "alt_kgco2": null },
+    { "id": 25, "name": "Reinforcement Bar (TMT)", "kgco2_per_kg": 1.35, "category": "Metal", "alternative": "Recycled Steel", "alt_kgco2": 0.44 }
+  ],
+  "benchmark_kgco2_total": 85000
+}
