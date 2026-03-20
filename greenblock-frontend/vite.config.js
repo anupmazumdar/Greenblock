@@ -5,7 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://127.0.0.1:8000'  // Forward API calls to FastAPI
+      '/api': 'http://127.0.0.1:8000'  // local dev ke liye
     }
+  },
+  define: {
+    'import.meta.env.VITE_API_URL': JSON.stringify('https://greenblock-production.up.railway.app')
   }
 })

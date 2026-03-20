@@ -1,7 +1,11 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.PROD
+  ? 'https://greenblock-production.up.railway.app/api'
+  : '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   timeout: 5000
 })
 
