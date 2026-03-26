@@ -7,3 +7,18 @@ body {
   color: #f1f5f9;
   font-family: 'Inter', sans-serif;
 }
+
+@keyframes modeFadeEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mode-fade-enter {
+  animation: modeFadeEnter 220ms ease-out;
+}

@@ -97,3 +97,31 @@ def control_relay(cmd: RelayCommand):
         "state": "ON" if cmd.state else "OFF",
         "note": "Simulated — connect Arduino to execute physically"
     }
+
+
+@router.get("/forecast")
+def get_solar_forecast():
+    return {
+        "status": "ok",
+        "next_24h_kwh": [0.0, 0.0, 0.1, 0.3, 0.8, 1.2, 1.6, 1.9, 1.6, 1.0, 0.4, 0.1],
+        "model": "simulated"
+    }
+
+
+@router.get("/rfid-log")
+def get_rfid_log():
+    return {
+        "count": 3,
+        "data": [
+            {"uid": "A3F29C01", "name": "Admin", "event": "entry", "timestamp": datetime.utcnow().isoformat()},
+            {"uid": "C7A11B9F", "name": "Visitor", "event": "entry", "timestamp": datetime.utcnow().isoformat()},
+            {"uid": "C7A11B9F", "name": "Visitor", "event": "exit", "timestamp": datetime.utcnow().isoformat()},
+        ]
+    }
+
+
+@router.get("/air-quality")
+def get_air_quality():
+    co2_ppm = random.randint(650, 1400)
+    recommendation = "Ventilation required" if co2_ppm > 1200 else "Air quality acceptable"
+    return {"co2_ppm": co2_ppm, "recommendation": recommendation}

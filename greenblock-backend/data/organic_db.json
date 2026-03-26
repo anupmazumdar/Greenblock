@@ -1,0 +1,18 @@
+{
+  "remedies": [
+    {
+      "risk": "fungal",
+      "trigger": "humidity_gt_80_and_temp_20_28",
+      "name": "Neem Oil Spray",
+      "recipe": ["5ml neem oil", "1L water", "2 drops dish soap"],
+      "best_time": "17:00-19:00"
+    },
+    {
+      "risk": "blight",
+      "trigger": "humidity_gt_85_and_rain_forecast_true",
+      "name": "Baking Soda Spray",
+      "recipe": ["1 tsp baking soda", "1L water", "2 drops mild soap"],
+      "best_time": "16:00-18:00"
+    }
+  ]
+}

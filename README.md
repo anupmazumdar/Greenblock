@@ -815,15 +815,15 @@ RFID RC522:  ⚠️ 3.3V ONLY — 5V will permanently damage it
 
 ## 📅 Day-by-Day Build Timeline
 
-| Day | Date | Focus | Status |
-| ----- | ------ | ------- | -------- |
-| **Day 1** | Fri Mar 20 | FastAPI + React scaffold | ✅ Done |
-| **Day 2** | Sat Mar 21 | Dashboard + Deploy (Vercel + Railway) | ✅ Done |
-| **Day 3** | Sun Mar 22 | Weather API + Carbon DB | ✅ Done |
-| **Day 4** | Mon Mar 23 | Arduino `sensor_hub.ino` + README v3 | ✅ Done |
-| **Day 5** | Tue Mar 24 | `serial_bridge.py` + MQTT live + Anomaly model | ⏳ Pending |
-| **Day 6** | Wed Mar 25 | All new features + AgriMode + live demo test | ⏳ Pending |
-| **Day 7** | Thu Mar 26 | Pitch deck + demo video + project report | ⏳ Pending |
+|    Day    |    Date    |              Focus                              | Status |
+| --------- | ---------- | ------- ----------------------------------------| -------- |
+| **Day 1** | Fri Mar 20 | FastAPI + React scaffold                        | ✅ Done |
+| **Day 2** | Sat Mar 21 | Dashboard + Deploy (Vercel + Railway)           | ✅ Done |
+| **Day 3** | Sun Mar 22 | Weather API + Carbon DB                         | ✅ Done |
+| **Day 4** | Mon Mar 23 | Arduino `sensor_hub.ino` + README v3            | ✅ Done |
+| **Day 5** | Tue Mar 24 | `serial_bridge.py` + MQTT live + Anomaly model  | ⏳ Pending |
+| **Day 6** | Wed Mar 25 | All new features + AgriMode + live demo test    | ⏳ Pending |
+| **Day 7** | Thu Mar 26 | Pitch deck + demo video + project report        | ⏳ Pending |
 | **Submission** | Fri Mar 27 | Final submission | 🎯 Deadline |
 
 ### Day 5 Checklist

@@ -1,19 +1,25 @@
 import { Link, useLocation } from 'react-router-dom'
 
-const links = [
+const greenLinks = [
   { path: '/', label: '⚡ Energy' },
   { path: '/carbon', label: '🏗️ Carbon' },
   { path: '/hvac', label: '❄️ HVAC' },
 ]
 
-export default function Navbar() {
+const agriLinks = [
+  { path: '/', label: '🌾 Agri Dashboard' },
+]
+
+export default function Navbar({ mode = 'greenblock' }) {
   const { pathname } = useLocation()
+  const links = mode === 'agriblock' ? agriLinks : greenLinks
+  const brandText = mode === 'agriblock' ? '🌾 AgriBlock' : '🌿 GreenBlock'
 
   return (
     <nav className="bg-slate-800 border-b border-slate-700 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <span className="text-green-400 font-bold text-xl tracking-tight">
-          🌿 GreenBlock
+          {brandText}
         </span>
         <div className="flex gap-2">
           {links.map(({ path, label }) => (
