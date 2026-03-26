@@ -28,35 +28,8 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      <Navbar mode={mode} />
+      <Navbar mode={mode} onModeChange={handleModeChange} />
       <main key={mode} className="mode-fade-enter max-w-7xl mx-auto px-4 py-6">
-        <div className="mb-6 flex justify-center">
-          <div className="inline-flex rounded-xl border border-slate-700 bg-slate-800 p-1">
-            <button
-              type="button"
-              onClick={() => handleModeChange('greenblock')}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                mode === 'greenblock'
-                  ? 'bg-green-500 text-slate-900'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              GreenBlock
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeChange('agriblock')}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                mode === 'agriblock'
-                  ? 'bg-emerald-400 text-slate-900'
-                  : 'text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              AgriBlock
-            </button>
-          </div>
-        </div>
-
         <Routes>
           {mode === 'agriblock' ? (
             <>
