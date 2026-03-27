@@ -39,8 +39,9 @@ function getRuntimeApiBase() {
 const envApiBase = normalizeApiBase(import.meta.env.VITE_API_URL)
 const hostedApiBase = normalizeApiBase('https://greenblock-api-production.up.railway.app')
 const runtimeApiBase = getRuntimeApiBase()
+const lanApiBase = normalizeApiBase('http://greenblock.local:8000')
 
-const baseCandidates = ['/api', envApiBase, runtimeApiBase, hostedApiBase].filter(Boolean)
+const baseCandidates = ['/api', envApiBase, runtimeApiBase, lanApiBase, hostedApiBase].filter(Boolean)
 const dedupedBaseCandidates = [...new Set(baseCandidates)]
 
 const api = axios.create({
@@ -56,15 +57,22 @@ function isRetryableError(error) {
 
 async function requestWithFailover(config) {
   let lastError = null
+  const { validate } = config
+  const requestConfig = { ...config }
+  delete requestConfig.validate
 
   for (const baseURL of dedupedBaseCandidates) {
     try {
-      const response = await api.request({ ...config, baseURL })
+      const response = await api.request({ ...requestConfig, baseURL })
 
       // If proxy/upstream is misconfigured, some servers return HTML with 200.
       // Treat that as invalid API response and continue failover.
       if (typeof response?.data === 'string') {
         throw new Error(`Invalid API payload from ${baseURL}`)
+      }
+
+      if (typeof validate === 'function' && !validate(response?.data)) {
+        throw new Error(`Unexpected API schema from ${baseURL}`)
       }
 
       if (api.defaults.baseURL !== baseURL) {
@@ -82,13 +90,29 @@ async function requestWithFailover(config) {
   throw lastError
 }
 
-export const getSensors = () => requestWithFailover({ method: 'get', url: '/sensors' })
-export const getSensorHistory = () => requestWithFailover({ method: 'get', url: '/sensors/history' })
+const hasSensorShape = (data) => (
+  data && typeof data === 'object' &&
+  typeof data.timestamp === 'string' &&
+  Object.prototype.hasOwnProperty.call(data, 'temp')
+)
+
+const hasSensorHistoryShape = (data) => (
+  data && typeof data === 'object' && Array.isArray(data.data)
+)
+
+const hasWeatherShape = (data) => (
+  data && typeof data === 'object' &&
+  data.status === 'ok' &&
+  data.data && typeof data.data === 'object'
+)
+
+export const getSensors = () => requestWithFailover({ method: 'get', url: '/sensors', validate: hasSensorShape })
+export const getSensorHistory = () => requestWithFailover({ method: 'get', url: '/sensors/history', validate: hasSensorHistoryShape })
 export const getMaterials = () => requestWithFailover({ method: 'get', url: '/materials' })
 export const logMaterial = (data) => requestWithFailover({ method: 'post', url: '/materials', data })
 export const getCarbonSummary = () => requestWithFailover({ method: 'get', url: '/carbon-summary' })
 export const getHvacRecommendation = (params) => requestWithFailover({ method: 'get', url: '/hvac-recommendation', params })
-export const getWeather = () => requestWithFailover({ method: 'get', url: '/weather' })
+export const getWeather = () => requestWithFailover({ method: 'get', url: '/weather', validate: hasWeatherShape })
 
 export const getCarbonSavings = () => requestWithFailover({ method: 'get', url: '/carbon-savings' })
 export const getAnomalies = () => requestWithFailover({ method: 'get', url: '/anomalies' })
