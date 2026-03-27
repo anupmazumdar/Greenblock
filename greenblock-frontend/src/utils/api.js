@@ -22,8 +22,13 @@ function getRuntimeApiBase() {
     const normalizedOverride = normalizeApiBase(localOverride)
     if (normalizedOverride) return normalizedOverride
 
-    const host = window.location.hostname
+    const { hostname: host, protocol } = window.location
     if (!host || host === 'localhost' || host === '127.0.0.1') return null
+
+    // Avoid mixed-content errors on HTTPS pages.
+    if (protocol === 'https:') {
+      return null
+    }
 
     return normalizeApiBase(`http://${host}:8000`)
   } catch {
@@ -35,7 +40,7 @@ const envApiBase = normalizeApiBase(import.meta.env.VITE_API_URL)
 const hostedApiBase = normalizeApiBase('https://greenblock-api-production.up.railway.app')
 const runtimeApiBase = getRuntimeApiBase()
 
-const baseCandidates = [envApiBase, runtimeApiBase, '/api', hostedApiBase].filter(Boolean)
+const baseCandidates = ['/api', envApiBase, runtimeApiBase, hostedApiBase].filter(Boolean)
 const dedupedBaseCandidates = [...new Set(baseCandidates)]
 
 const api = axios.create({
