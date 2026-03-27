@@ -1,0 +1,9 @@
+[Unit]
+Description=GreenBlock Git Auto Update Runner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Run as root so service restart commands work reliably.
+ExecStart=/bin/bash /home/pi/Greenblock/deploy/systemd/auto-update.sh

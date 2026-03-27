@@ -382,6 +382,55 @@ npm run preview
 - Set `WEATHER_API_KEY` in deployment secret manager.
 - Do not commit `.env` with real secrets.
 
+### Raspberry Pi Auto-start (systemd)
+
+Systemd templates are available in:
+
+- `deploy/systemd/greenblock-backend.service`
+- `deploy/systemd/greenblock-serial-bridge.service`
+- `deploy/systemd/greenblock-autoupdate.service`
+- `deploy/systemd/greenblock-autoupdate.timer`
+- `deploy/systemd/auto-update.sh`
+- `deploy/systemd/install-systemd.sh`
+
+On Raspberry Pi:
+
+```bash
+cd ~/Greenblock
+chmod +x deploy/systemd/install-systemd.sh
+./deploy/systemd/install-systemd.sh
+```
+
+Manual status check:
+
+```bash
+sudo systemctl status greenblock-backend
+sudo systemctl status greenblock-serial-bridge
+sudo systemctl status greenblock-autoupdate.timer
+```
+
+Manual logs:
+
+```bash
+journalctl -u greenblock-backend -n 100 --no-pager
+journalctl -u greenblock-serial-bridge -n 100 --no-pager
+journalctl -u greenblock-autoupdate.service -n 100 --no-pager
+```
+
+### Automatic GitHub Sync to Pi
+
+`greenblock-autoupdate.timer` runs every 2 minutes and does this:
+
+1. Fetches latest `origin/main`
+2. Performs fast-forward pull if new commit exists
+3. Restarts backend + serial bridge if backend/config changed
+4. Rebuilds frontend if `greenblock-frontend/` changed
+
+Safety behavior:
+
+- If Pi has local uncommitted changes, updater skips pull to avoid conflicts.
+- If no remote changes exist, nothing is restarted.
+
 ---
 
 ## 🔒 Security & Secrets
