@@ -14,10 +14,28 @@ function normalizeApiBase(rawUrl) {
   return `${trimmed}/api`
 }
 
+function getRuntimeApiBase() {
+  try {
+    if (typeof window === 'undefined') return null
+
+    const localOverride = window.localStorage.getItem('GREENBLOCK_API_URL')
+    const normalizedOverride = normalizeApiBase(localOverride)
+    if (normalizedOverride) return normalizedOverride
+
+    const host = window.location.hostname
+    if (!host || host === 'localhost' || host === '127.0.0.1') return null
+
+    return normalizeApiBase(`http://${host}:8000`)
+  } catch {
+    return null
+  }
+}
+
 const envApiBase = normalizeApiBase(import.meta.env.VITE_API_URL)
 const hostedApiBase = normalizeApiBase('https://greenblock-api-production.up.railway.app')
+const runtimeApiBase = getRuntimeApiBase()
 
-const baseCandidates = [envApiBase, '/api', hostedApiBase].filter(Boolean)
+const baseCandidates = [envApiBase, runtimeApiBase, '/api', hostedApiBase].filter(Boolean)
 const dedupedBaseCandidates = [...new Set(baseCandidates)]
 
 const api = axios.create({
