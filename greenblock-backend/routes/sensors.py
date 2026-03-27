@@ -2,11 +2,13 @@ import random
 from datetime import datetime, timedelta
 from fastapi import APIRouter
 from pydantic import BaseModel
+from data_manager import get_data_manager
 
 router = APIRouter()
 
-# In-memory history store
+# In-memory history store (for quick access; persisted to SQLite)
 _history: list[dict] = []
+_dm = get_data_manager()
 
 
 def _simulate_reading() -> dict:
@@ -86,6 +88,8 @@ def ingest_sensor_data(payload: IngestPayload):
         "source": "arduino"
     }
     _history.append(record)
+    # Persist to SQLite for historical queries
+    _dm.store_sensor_reading(record)
     return {"status": "ok", "recorded": record}
 
 
