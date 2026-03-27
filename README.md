@@ -571,24 +571,24 @@ The system comes pre-populated with realistic Kaggle baseline data:
 
 **Soil Data (3 baselines)**
 ```python
-{"soil_moisture": 65%, "soil_temp": 25.2°C, "ph": 6.8, "nitrogen": 42, "phosphorus": 18, "potassium": 180}
-{"soil_moisture": 58%, "soil_temp": 26.1°C, "ph": 6.9, "nitrogen": 40, "phosphorus": 16, "potassium": 165}
-{"soil_moisture": 72%, "soil_temp": 24.8°C, "ph": 6.7, "nitrogen": 45, "phosphorus": 20, "potassium": 190}
+{"soil_moisture": 65, "soil_temp": 25.2, "ph": 6.8, "nitrogen": 42, "phosphorus": 18, "potassium": 180}
+{"soil_moisture": 58, "soil_temp": 26.1, "ph": 6.9, "nitrogen": 40, "phosphorus": 16, "potassium": 165}
+{"soil_moisture": 72, "soil_temp": 24.8, "ph": 6.7, "nitrogen": 45, "phosphorus": 20, "potassium": 190}
 ```
 
 **Crop Data (4 crops)**
 ```python
-{"crop": "Rice",      "yield": 4.5,  "water_needed": 1200, "temp_optimal": 27.5°C}
-{"crop": "Wheat",     "yield": 3.2,  "water_needed": 450,  "temp_optimal": 15.0°C}
-{"crop": "Corn",      "yield": 6.8,  "water_needed": 600,  "temp_optimal": 25.0°C}
-{"crop": "Sugarcane", "yield": 65,   "water_needed": 2250, "temp_optimal": 28.0°C}
+{"crop": "Rice",      "yield": 4.5,  "water_needed": 1200, "temp_optimal": 27.5}
+{"crop": "Wheat",     "yield": 3.2,  "water_needed": 450,  "temp_optimal": 15.0}
+{"crop": "Corn",      "yield": 6.8,  "water_needed": 600,  "temp_optimal": 25.0}
+{"crop": "Sugarcane", "yield": 65,   "water_needed": 2250, "temp_optimal": 28.0}
 ```
 
 **Weather Baselines (3 patterns)**
 ```python
-{"rainfall": 2.5mm,  "humidity": 68%, "wind_speed": 12 km/h, "sun_hours": 8.2h}
-{"rainfall": 0.0mm,  "humidity": 45%, "wind_speed": 8 km/h,  "sun_hours": 10.5h}
-{"rainfall": 15.3mm, "humidity": 82%, "wind_speed": 22 km/h, "sun_hours": 2.1h}
+{"rainfall": 2.5, "humidity": 68, "wind_speed": 12, "sun_hours": 8.2}
+{"rainfall": 0.0, "humidity": 45, "wind_speed": 8, "sun_hours": 10.5}
+{"rainfall": 15.3, "humidity": 82, "wind_speed": 22, "sun_hours": 2.1}
 ```
 
 ### Endpoints Now Using Hybrid Fallback
