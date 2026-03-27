@@ -487,32 +487,169 @@ D = <50     →  "Poor — significant energy waste detected"
 | ------- | ----------- |
 | **Frontend** | React 18 + Vite + TailwindCSS + Recharts + Axios |
 | **Backend** | Python FastAPI + Uvicorn |
+| **Data Layer** | SQLite (persistence) + Kaggle baselines (fallback) ← NEW |
 | **IoT Protocol** | MQTT (Mosquitto broker on Pi) |
-| **Database** | InfluxDB Cloud (sensors) + PostgreSQL (carbon ledger) |
+| **Database** | InfluxDB Cloud (sensors) + PostgreSQL (carbon ledger) + SQLite (local analytics) |
 | **ML / AI** | Meta Prophet (solar forecast) · Scikit-learn IsolationForest (anomaly) · Rule engine (HVAC + Agri) |
 | **Scheduler** | APScheduler (7AM digest + midnight score calculation) |
 | **Weather API** | OpenWeatherMap free tier |
 | **Alerts** | Twilio (WhatsApp) + python-telegram-bot |
-| **Pi Libraries** | Adafruit-DHT · adafruit-circuitpython-ina219 · RPi.GPIO · smbus2 · paho-mqtt · pyserial |
+| **Pi Libraries** | Adafruit-DHT · adafruit-circuitpython-ina219 · RPi.GPIO · smbus2 · paho-mqtt · pyserial · **sqlite3** |
 | **Frontend Host** | Vercel — greenblock.anupmazumdar.me |
 | **Backend Host** | Railway — greenblock-production.up.railway.app |
 | **Version Control** | GitHub — github.com/anupmazumdar/Greenblock |
 
 ---
 
-## 📁 Project File Structure
+## � NEW — Hybrid Data Manager (Kaggle Fallback + SQLite Persistence)
+
+GreenBlock now integrates a **smart hybrid data layer** that ensures continuous operation even when live sensors are unavailable. Powered by Kaggle baseline datasets and SQLite persistence for historical analysis.
+
+### Architecture: Live → Fallback → Persistence
+
+```text
+Live Sensor Data (Arduino)
+       ↓
+   SUCCESS? ✓
+       ├─→ Store in in-memory history
+       └─→ Persist to SQLite sensor_readings table
+       
+   FAIL? ✗
+       ↓
+   Use Kaggle Baseline
+       ├─→ Soil moisture data (crop + NPK values)
+       ├─→ Crop yield recommendations
+       ├─→ Weather patterns (rainfall, humidity, wind)
+       └─→ Persist fallback source for debugging
+       
+   Result: Always valid data → Dashboard never shows "no data"
+```
+
+### GreenBlockData Class Features
+
+```python
+# greenblock-backend/data_manager.py
+from data_manager import get_data_manager
+
+dm = get_data_manager()  # Singleton instance
+
+# Methods
+soil = dm.get_soil_moisture(live_reading)  # Live → Kaggle fallback
+crop = dm.get_crop_recommendation()         # Kaggle baseline with confidence
+weather = dm.get_weather_baseline()         # Weather data for HVAC/agri
+history = dm.get_sensor_history(hours=24)   # Last 24hrs from SQLite
+soil_trend = dm.get_soil_history(days=7)    # 7-day soil data for ML
+```
+
+### SQLite Schema
+
+Four tables automatically created on first init:
+
+```sql
+sensor_readings
+├── timestamp, temp, humidity, solar_v, solar_mw, occupancy, relay, source
+└── Used by: /api/sensors/history
+
+soil_data
+├── timestamp, soil_moisture, soil_temp, ph, nitrogen, phosphorus, potassium, source
+└── Used by: /api/agri/irrigation-status, /api/agri/disease-risk
+
+crop_recommendations
+├── timestamp, crop, yield_estimate, water_needed, temp_optimal, confidence, source
+└── Used by: /api/agri/recommendation
+
+weather_baseline
+├── timestamp, rainfall, humidity, wind_speed, sun_hours, source
+└── Used by: /api/hvac-recommendation, /api/agri fallback
+```
+
+Location: `greenblock-backend/greenblock_analytics.db` (created on first use)
+
+### Kaggle Baseline Datasets Integrated
+
+The system comes pre-populated with realistic Kaggle baseline data:
+
+**Soil Data (3 baselines)**
+```python
+{"soil_moisture": 65%, "soil_temp": 25.2°C, "ph": 6.8, "nitrogen": 42, "phosphorus": 18, "potassium": 180}
+{"soil_moisture": 58%, "soil_temp": 26.1°C, "ph": 6.9, "nitrogen": 40, "phosphorus": 16, "potassium": 165}
+{"soil_moisture": 72%, "soil_temp": 24.8°C, "ph": 6.7, "nitrogen": 45, "phosphorus": 20, "potassium": 190}
+```
+
+**Crop Data (4 crops)**
+```python
+{"crop": "Rice",      "yield": 4.5,  "water_needed": 1200, "temp_optimal": 27.5°C}
+{"crop": "Wheat",     "yield": 3.2,  "water_needed": 450,  "temp_optimal": 15.0°C}
+{"crop": "Corn",      "yield": 6.8,  "water_needed": 600,  "temp_optimal": 25.0°C}
+{"crop": "Sugarcane", "yield": 65,   "water_needed": 2250, "temp_optimal": 28.0°C}
+```
+
+**Weather Baselines (3 patterns)**
+```python
+{"rainfall": 2.5mm,  "humidity": 68%, "wind_speed": 12 km/h, "sun_hours": 8.2h}
+{"rainfall": 0.0mm,  "humidity": 45%, "wind_speed": 8 km/h,  "sun_hours": 10.5h}
+{"rainfall": 15.3mm, "humidity": 82%, "wind_speed": 22 km/h, "sun_hours": 2.1h}
+```
+
+### Endpoints Now Using Hybrid Fallback
+
+| Endpoint | Live Source | Fallback | Behavior |
+| --------- | ------------ | --------- | ---------- |
+| `GET /api/agri/irrigation-status` | Arduino soil moisture | Kaggle baseline | Returns pump ON/OFF decision + moisture level |
+| `GET /api/agri/disease-risk` | Live DHT22 + rain | Kaggle soil patterns | Calculates fungal/pest risk |
+| `GET /api/agri/recommendation` | ML model | Kaggle crop yields | Suggests crop with confidence score |
+| `POST /api/sensors/ingest` | Arduino → SQLite | N/A | Every Arduino reading persisted to DB |
+
+Each response includes `"source": "arduino"` or `"source": "kaggle_baseline"` for transparency.
+
+### Production Roadmap
+
+Currently using hardcoded Kaggle baselines. Next steps:
+
+1. **Download actual Kaggle datasets**
+   ```bash
+   kaggle datasets download -d atharvaingle/crop-recommendation-dataset
+   kaggle datasets download -d abhinand05/agri-weather-data
+   ```
+
+2. **Load CSVs into SQLite on boot**
+   ```python
+   df = pd.read_csv('crop_data.csv')
+   df.to_sql('kaggle_crop_baseline', conn, if_exists='replace')
+   ```
+
+3. **Replace hardcoded arrays with SQL queries**
+   ```python
+   baseline = db.execute("SELECT * FROM kaggle_crop_baseline ORDER BY RANDOM() LIMIT 1")
+   ```
+
+4. **Train ML models on accumulated SQLite data**
+   - Use 6+ months of sensor readings to retrain Prophet (solar forecast)
+   - Use soil + weather to improve crop recommendation confidence
+
+**Why SQLite + Kaggle?**
+- ✅ Zero external dependencies (no cloud DB needed)
+- ✅ Resilient: Works offline or without internet
+- ✅ Realistic: Kaggle data is domain-appropriate not random
+- ✅ Trainable: Accumulates real sensor data for future ML models
+- ✅ Debuggable: Source tracking helps identify data quality issues
+
+---
+
+## �📁 Project File Structure
 
 ```text
 GreenBlock/
 ├── greenblock-backend/
 │   ├── main.py                      # FastAPI entry + CORS + scheduler init
 │   ├── serial_bridge.py             # Arduino USB serial → FastAPI POST
+│   ├── data_manager.py              # Hybrid live + Kaggle fallback ← NEW
 │   ├── requirements.txt
 │   ├── .env.example
 │   ├── .python-version              # Pins Python 3.11 for Railway
 │   ├── Procfile                     # Railway deploy config
 │   ├── routes/
-│   │   ├── sensors.py               # GET /api/sensors + history + ingest
+│   │   ├── sensors.py               # GET /api/sensors + history + ingest (persists to SQLite)
 │   │   ├── carbon.py                # POST /api/materials, GET /api/carbon-summary
 │   │   ├── carbon_savings.py        # GET /api/carbon-savings ← NEW
 │   │   ├── hvac.py                  # GET /api/hvac-recommendation
@@ -520,7 +657,7 @@ GreenBlock/
 │   │   ├── occupancy.py             # GET /api/occupancy-heatmap ← NEW
 │   │   ├── visitor.py               # GET /api/visitor-count ← NEW
 │   │   ├── grid_score.py            # GET /api/grid-dependency ← NEW
-│   │   ├── agri.py                  # GET /api/agri-recommendation
+│   │   ├── agri.py                  # GET /api/agri-recommendation (now uses hybrid fallback)
 │   │   ├── alerts.py                # POST /api/alerts (WhatsApp/Telegram)
 │   │   ├── digest.py                # 7AM morning digest scheduler ← NEW
 │   │   └── score.py                 # GET /api/energy-score
@@ -529,7 +666,8 @@ GreenBlock/
 │   │   └── anomaly_detector.py      # IsolationForest model ← NEW
 │   └── data/
 │       ├── carbon_db.json           # 25 Indian materials + kgCO2 values
-│       └── organic_db.json          # Neem spray + disease recipes ← NEW
+│       ├── organic_db.json          # Neem spray + disease recipes ← NEW
+│       └── greenblock_analytics.db  # SQLite database (auto-created) ← NEW
 │
 ├── greenblock-frontend/
 │   ├── src/
@@ -574,8 +712,8 @@ GreenBlock/
 | Method | Endpoint | Description |
 | -------- | ---------- | ------------- |
 | `GET` | `/api/sensors` | Latest sensor readings (all fields) |
-| `GET` | `/api/sensors/history` | Last 24hrs sensor data |
-| `POST` | `/api/sensors/ingest` | Arduino serial bridge posts here |
+| `GET` | `/api/sensors/history` | Last 24hrs sensor data from SQLite ← NOW PERSISTED |
+| `POST` | `/api/sensors/ingest` | Arduino serial bridge posts here; **auto-persists to SQLite** ← NEW |
 | `POST` | `/api/materials` | Log construction material + quantity |
 | `GET` | `/api/carbon-summary` | Total kgCO2 + green suggestions |
 | `GET` | `/api/carbon-savings` | Savings vs conventional baseline ← NEW |
@@ -595,11 +733,11 @@ GreenBlock/
 
 | Method | Endpoint | Description |
 | -------- | ---------- | ------------- |
-| `GET` | `/api/agri/recommendation` | Full agri rules engine output |
-| `GET` | `/api/agri/irrigation-status` | Pump ON/OFF decision + reason |
-| `GET` | `/api/agri/disease-risk` | Fungal/pest risk + organic remedy |
+| `GET` | `/api/agri/recommendation` | Crop yields from Kaggle baseline (or live ML) |
+| `GET` | `/api/agri/irrigation-status` | **Hybrid**: Pump ON/OFF via soil moisture (live → Kaggle fallback) |
+| `GET` | `/api/agri/disease-risk` | **Hybrid**: Fungal risk via DHT22 + soil data (fallback included) |
 | `POST` | `/api/agri/crop` | Set active crop |
-| `GET` | `/api/agri/tank-level` | Water tank level from ultrasonic ← NEW |
+| `GET` | `/api/agri/tank-level` | **Hybrid**: Water tank level (sensor or fallback) |
 
 ### Alerts
 
