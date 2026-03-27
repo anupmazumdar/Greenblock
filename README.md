@@ -164,6 +164,24 @@ Notes:
 - If `WEATHER_API_KEY` is missing, `/api/weather` falls back to simulated data.
 - For Arduino on Pi, `SERIAL_PORT` is often `/dev/ttyACM0`.
 
+Frontend env (for robust API connectivity) is in:
+`greenblock-frontend/.env.example`
+
+```env
+# Can be origin OR origin/api
+VITE_API_URL=http://<pi-ip>:8000
+
+# Optional dev proxy target (Vite)
+VITE_BACKEND_PROXY_TARGET=http://<pi-ip>:8000
+```
+
+Examples:
+
+- Frontend on laptop, backend on Pi:
+  - `VITE_API_URL=http://192.168.1.25:8000`
+- Both frontend + backend on same Pi:
+  - Leave empty and use Vite proxy defaults, or set both to `http://127.0.0.1:8000`
+
 ---
 
 ## 🔗 Key API Endpoints

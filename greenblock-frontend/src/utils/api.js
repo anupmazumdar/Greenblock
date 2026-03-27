@@ -1,8 +1,26 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.PROD
-  ? 'https://greenblock-production.up.railway.app/api'
-  : '/api'
+function normalizeApiBase(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return null
+
+  const trimmed = rawUrl.trim().replace(/\/+$/, '')
+  if (!trimmed) return null
+
+  // If user already provided /api suffix, keep it as-is.
+  if (/\/api$/i.test(trimmed)) {
+    return trimmed
+  }
+
+  return `${trimmed}/api`
+}
+
+const envApiBase = normalizeApiBase(import.meta.env.VITE_API_URL)
+
+// Strategy:
+// 1) Use VITE_API_URL when explicitly provided.
+// 2) In dev, fallback to Vite proxy (/api).
+// 3) In prod, fallback to same-origin /api.
+const baseURL = envApiBase || '/api'
 
 const api = axios.create({
   baseURL,
