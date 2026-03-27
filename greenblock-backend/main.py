@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
 from routes import (
     sensors,
     carbon,
@@ -13,7 +15,25 @@ from routes import (
     alerts,
     digest,
     score,
+    health,
 )
+
+load_dotenv()
+
+
+def _parse_allowed_origins() -> list[str]:
+    """Parse comma-separated CORS origins from env.
+
+    Example:
+    ALLOWED_ORIGINS=https://greenblock.anupmazumdar.me,http://localhost:5173
+    """
+    raw = os.getenv("ALLOWED_ORIGINS", "*").strip()
+    if not raw:
+        return ["*"]
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
+ALLOWED_ORIGINS = _parse_allowed_origins()
 
 app = FastAPI(
     title="GreenBlock API",
@@ -23,7 +43,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Tighten this in production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,6 +61,7 @@ app.include_router(agri.router, prefix="/api", tags=["Agri"])
 app.include_router(alerts.router, prefix="/api", tags=["Alerts"])
 app.include_router(digest.router, prefix="/api", tags=["Alerts"])
 app.include_router(score.router, prefix="/api", tags=["Energy"])
+app.include_router(health.router, prefix="/api", tags=["Health"])
 
 
 @app.get("/")

@@ -147,6 +147,9 @@ Backend now includes a usable `greenblock-backend/.env.example` template:
 WEATHER_API_KEY=
 OWM_CITY=Jaipur
 
+# CORS: comma-separated origins (use '*' only in dev)
+ALLOWED_ORIGINS=*
+
 # Serial bridge settings (for Arduino bridge script)
 SERIAL_PORT=/dev/ttyACM0
 BAUD_RATE=9600
@@ -210,6 +213,11 @@ Base: `/api`
 - `POST /alerts/telegram`
 - `GET /alerts/digest`
 
+### Health
+
+- `GET /health`
+- `GET /ready`
+
 ### Quick curl Examples
 
 ```bash
@@ -247,12 +255,68 @@ React Frontend (Vite) <--------------------+
 
 ---
 
+## 🖼️ Demo Screenshots
+
+Add these screenshots under `docs/screenshots/` and update links:
+
+- Building mode dashboard
+- Carbon tracker view
+- HVAC recommendation view
+- AgriBlock control center
+- Disease-risk panel with frost/spray-window output
+
+Suggested naming:
+
+```text
+docs/screenshots/building-dashboard.png
+docs/screenshots/carbon-tracker.png
+docs/screenshots/hvac-rules.png
+docs/screenshots/agriblock-dashboard.png
+docs/screenshots/agri-disease-risk.png
+```
+
+---
+
 ## 🔌 Services Running
 
 | Service | Status | Command |
 | --- | --- | --- |
 | Mosquitto | ✅ Active | `sudo systemctl status mosquitto` |
 | Arduino | ✅ `/dev/ttyACM0` | `ls /dev/ttyACM*` |
+
+---
+
+## 🛠️ Troubleshooting
+
+### 1) AgriBlock dashboard not opening
+
+- Ensure frontend routes are opening `/agri` when Agriblock mode is selected.
+- If cached UI state is stale, hard refresh browser (`Ctrl + F5`).
+- Confirm frontend is running on `http://localhost:5173`.
+
+### 2) Weather API shows simulated/unavailable
+
+- Set `WEATHER_API_KEY` in `greenblock-backend/.env`.
+- Optionally set `OWM_CITY` (default: Jaipur).
+- Restart backend after env changes.
+
+### 3) Arduino serial not detected
+
+- Check device: `ls /dev/ttyACM*` (Linux/Pi).
+- Set `SERIAL_PORT` in `.env` accordingly.
+- Verify permissions for serial device.
+
+### 4) CORS errors in frontend
+
+- Set `ALLOWED_ORIGINS` in backend env:
+  - Example: `ALLOWED_ORIGINS=http://localhost:5173,https://your-domain.com`
+- Restart backend service.
+
+### 5) API is up but checks fail
+
+- Test health endpoints:
+  - `GET /api/health`
+  - `GET /api/ready`
 
 ---
 
@@ -290,6 +354,88 @@ Legend:
 
 ---
 
+## 🚢 Deployment Notes
+
+### Backend
+
+- Start command (Procfile equivalent):
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+- Health checks:
+  - `/api/health`
+  - `/api/ready`
+
+### Frontend
+
+```bash
+cd greenblock-frontend
+npm run build
+npm run preview
+```
+
+### Recommended Prod Config
+
+- Restrict `ALLOWED_ORIGINS` to trusted domains.
+- Set `WEATHER_API_KEY` in deployment secret manager.
+- Do not commit `.env` with real secrets.
+
+---
+
+## 🔒 Security & Secrets
+
+- Keep API keys only in environment variables.
+- Never commit `.env` with real credentials.
+- Use least-privilege tokens for third-party APIs.
+- Rotate keys if exposure is suspected.
+- Keep CORS narrow in production (`ALLOWED_ORIGINS`).
+
+---
+
+## 📚 Data Sources & Attribution
+
+### Kaggle Datasets
+
+- crop-recommendation-dataset (atharvaingle)
+- rainfall-in-india (rajanand)
+- energy-consumption-dataset (robikscube) — pending
+- maize-crop-dataset — blocked/private
+
+### External APIs
+
+- OpenWeatherMap (live weather for HVAC + Agri rules)
+- NASA POWER API (planned)
+- data.gov.in mandi prices (planned)
+
+---
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Create feature branch (`feature/<name>`)
+3. Make changes with clear commits
+4. Run checks:
+   - backend compile check
+   - frontend build
+   - markdown lint for docs
+5. Open a PR to `main`
+
+---
+
+## 📝 Changelog
+
+### 2026-03-28
+
+- Added health/readiness endpoints (`/api/health`, `/api/ready`)
+- Added env-configurable CORS (`ALLOWED_ORIGINS`)
+- Enhanced Agri disease-risk with weather/frost/spray-window logic
+- Added CI workflow for backend + frontend checks
+- Improved README with setup, API examples, troubleshooting, and deployment notes
+
+---
+
 ## 🏆 Pitch Impact
 
 | Metric | Target |
@@ -306,4 +452,12 @@ Legend:
 - **Anup Mazumdar**
 - GitHub: [https://github.com/anupmazumdar](https://github.com/anupmazumdar)
 - LinkedIn: [https://www.linkedin.com/in/anup-mazumdar-1033b5321](https://www.linkedin.com/in/anup-mazumdar-1033b5321)
-- Project: GreenBlock + GraminMart = India ka pehla sensor-verified organic marketplace
+- Project:
+  GreenBlock + GraminMart = India ka pehla sensor-verified organic marketplace
+
+---
+
+## 📄 License
+
+License selection is pending.
+Until explicitly added, treat this project as private/internal for reuse.
