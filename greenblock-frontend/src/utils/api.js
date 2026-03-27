@@ -60,6 +60,13 @@ async function requestWithFailover(config) {
   for (const baseURL of dedupedBaseCandidates) {
     try {
       const response = await api.request({ ...config, baseURL })
+
+      // If proxy/upstream is misconfigured, some servers return HTML with 200.
+      // Treat that as invalid API response and continue failover.
+      if (typeof response?.data === 'string') {
+        throw new Error(`Invalid API payload from ${baseURL}`)
+      }
+
       if (api.defaults.baseURL !== baseURL) {
         api.defaults.baseURL = baseURL
       }
