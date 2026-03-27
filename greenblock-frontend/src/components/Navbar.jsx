@@ -7,7 +7,7 @@ const greenLinks = [
 ]
 
 const agriLinks = [
-  { path: '/', label: '🌾 Agri Dashboard' },
+  { path: '/agri', label: '🌾 Agri Dashboard' },
 ]
 
 export default function Navbar({ mode = 'greenblock', onModeChange = () => {} }) {

@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom'
 import Navbar from './components/Navbar'
 import EnergyDashboard from './components/EnergyDashboard'
 import CarbonLogger from './components/CarbonLogger'
@@ -15,15 +22,41 @@ export default function App() {
 }
 
 function AppShell() {
-  const [mode, setMode] = useState('greenblock')
+  const location = useLocation()
+  const [mode, setMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('greenblock_mode')
+      if (saved === 'agriblock' || saved === 'greenblock') {
+        return saved
+      }
+    }
+    return 'greenblock'
+  })
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/agri') && mode !== 'agriblock') {
+      setMode('agriblock')
+      return
+    }
+
+    if (!location.pathname.startsWith('/agri') && mode === 'agriblock' && location.pathname === '/') {
+      return
+    }
+  }, [location.pathname, mode])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('greenblock_mode', mode)
+    }
+  }, [mode])
 
   const handleModeChange = (nextMode) => {
     if (nextMode === mode) {
       return
     }
     setMode(nextMode)
-    navigate('/', { replace: true })
+    navigate(nextMode === 'agriblock' ? '/agri' : '/', { replace: true })
   }
 
   return (
@@ -35,7 +68,7 @@ function AppShell() {
             <>
               <Route path="/" element={<AgriDashboard />} />
               <Route path="/agri" element={<AgriDashboard />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/agri" replace />} />
             </>
           ) : (
             <>

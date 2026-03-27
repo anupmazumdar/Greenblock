@@ -1,12 +1,50 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from data_manager import get_data_manager
+import os
 import random
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter()
 
 _active_crop = "wheat"
 _dm = get_data_manager()
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
+OWM_CITY = os.getenv("OWM_CITY", "Jaipur")
+
+
+def _get_weather_snapshot() -> dict:
+    """Get weather for agri rules; fallback to simulated values if API key is missing."""
+    if not WEATHER_API_KEY:
+        return {
+            "temp_c": 23.0,
+            "humidity": 68,
+            "description": "simulated",
+            "source": "simulated",
+        }
+
+    try:
+        url = (
+            "https://api.openweathermap.org/data/2.5/weather"
+            f"?q={OWM_CITY}&appid={WEATHER_API_KEY}&units=metric"
+        )
+        data = requests.get(url, timeout=5).json()
+        return {
+            "temp_c": float(data["main"]["temp"]),
+            "humidity": int(data["main"]["humidity"]),
+            "description": data["weather"][0]["description"],
+            "source": "live",
+        }
+    except Exception:
+        return {
+            "temp_c": 23.0,
+            "humidity": 68,
+            "description": "simulated_fallback",
+            "source": "simulated",
+        }
 
 
 class CropPayload(BaseModel):
@@ -44,16 +82,62 @@ def get_irrigation_status():
 
 @router.get("/agri/disease-risk")
 def get_disease_risk():
-    """Disease risk assessment using soil and environmental data."""
+    """Disease risk with weather-based frost and spray-window guidance."""
     soil = _dm.get_soil_moisture()
     moisture = soil.get("soil_moisture", 65)
-    risk_level = "high" if moisture > 75 else "medium" if moisture > 60 else "low"
+
+    weather = _get_weather_snapshot()
+    temp_c = weather["temp_c"]
+    humidity = weather["humidity"]
+
+    # Simple disease-risk heuristic: soil moisture + humid weather + mild temperatures.
+    disease_score = 0
+    if moisture > 75:
+        disease_score += 2
+    elif moisture > 60:
+        disease_score += 1
+
+    if humidity >= 80:
+        disease_score += 2
+    elif humidity >= 65:
+        disease_score += 1
+
+    if 18 <= temp_c <= 30:
+        disease_score += 1
+
+    if disease_score >= 4:
+        risk_level = "high"
+    elif disease_score >= 2:
+        risk_level = "medium"
+    else:
+        risk_level = "low"
+
+    frost_alert = temp_c <= 4
+    spray_window = "avoid" if humidity >= 85 or temp_c >= 34 else "recommended"
+
+    if risk_level == "high":
+        remedy = "Neem oil 5ml + 1L water + 2 drops soap"
+    elif risk_level == "medium":
+        remedy = "Light bio-fungicide spray in evening + improve airflow"
+    else:
+        remedy = "Monitor crop and maintain drainage"
+
     return {
         "risk": risk_level,
         "soil_moisture": moisture,
-        "source": soil.get("source"),
-        "condition": f"Soil moisture {moisture}% detected",
-        "remedy": "Neem oil 5ml + 1L water + 2 drops soap" if risk_level == "high" else "Monitor and maintain drainage",
+        "weather": {
+            "temp_c": temp_c,
+            "humidity": humidity,
+            "description": weather["description"],
+            "source": weather["source"],
+        },
+        "source": soil.get("source", "unknown"),
+        "condition": (
+            f"Soil {moisture}% | Temp {temp_c}C | Humidity {humidity}%"
+        ),
+        "frost_alert": frost_alert,
+        "spray_window": spray_window,
+        "remedy": remedy,
     }
 
 
