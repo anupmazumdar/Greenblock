@@ -24,13 +24,35 @@ function SensorCard({ label, value, unit, icon, color }) {
 export default function EnergyDashboard() {
   const [latest, setLatest] = useState(null)
   const [history, setHistory] = useState([])
+  const [apiOnline, setApiOnline] = useState(true)
+
+  const CACHE_LATEST_KEY = 'greenblock_latest_sensor'
+  const CACHE_HISTORY_KEY = 'greenblock_sensor_history'
+
+  const loadCache = () => {
+    try {
+      const cachedLatest = localStorage.getItem(CACHE_LATEST_KEY)
+      const cachedHistory = localStorage.getItem(CACHE_HISTORY_KEY)
+      if (cachedLatest) {
+        setLatest(JSON.parse(cachedLatest))
+      }
+      if (cachedHistory) {
+        setHistory(JSON.parse(cachedHistory))
+      }
+    } catch (e) {
+      console.warn('Failed to load sensor cache', e)
+    }
+  }
 
   const fetchLatest = async () => {
     try {
       const res = await getSensors()
       setLatest(res.data)
+      setApiOnline(true)
+      localStorage.setItem(CACHE_LATEST_KEY, JSON.stringify(res.data))
     } catch (e) {
       console.error(e)
+      setApiOnline(false)
     }
   }
 
@@ -39,24 +61,30 @@ export default function EnergyDashboard() {
       const res = await getSensorHistory()
       // Take last 24 points for charts (last 2 hours)
       const raw = res.data.data.slice(-24)
-      setHistory(raw.map((d) => ({
+      const mapped = raw.map((d) => ({
         time: d.timestamp.slice(11, 16),
         temp: d.temp,
         solar: d.solar_mw,
         humidity: d.humidity,
-      })))
+      }))
+      setHistory(mapped)
+      localStorage.setItem(CACHE_HISTORY_KEY, JSON.stringify(mapped))
     } catch (e) {
       console.error(e)
+      setApiOnline(false)
     }
   }
 
   useEffect(() => {
+    loadCache()
     fetchLatest()
     fetchHistory()
     // Auto-refresh every 5 seconds
     const interval = setInterval(fetchLatest, 5000)
     return () => clearInterval(interval)
   }, [])
+
+  const hasLatest = latest !== null
 
   return (
     <div className="space-y-6">
@@ -73,12 +101,17 @@ export default function EnergyDashboard() {
       {/* Status Bar */}
       <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex flex-wrap gap-6 text-sm">
         <span className="text-slate-400">
-          Occupancy: <span className={latest?.occupancy ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
-            {latest?.occupancy ? '🟢 Occupied' : '🔴 Vacant'}
+          API: <span className={apiOnline ? 'text-green-400 font-bold' : 'text-yellow-400 font-bold'}>
+            {apiOnline ? '🟢 Live' : '🟡 Offline (showing cached data if available)'}
           </span>
         </span>
         <span className="text-slate-400">
-          Relay: <span className="text-white font-bold">{latest?.relay ? 'ON' : 'OFF'}</span>
+          Occupancy: <span className={!hasLatest ? 'text-slate-300 font-bold' : latest?.occupancy ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+            {!hasLatest ? '⚪ Unknown' : latest?.occupancy ? '🟢 Occupied' : '🔴 Vacant'}
+          </span>
+        </span>
+        <span className="text-slate-400">
+          Relay: <span className="text-white font-bold">{!hasLatest ? '—' : latest?.relay ? 'ON' : 'OFF'}</span>
         </span>
         <span className="text-slate-400">
           Source: <span className="text-white font-bold">{latest?.source ?? '—'}</span>
