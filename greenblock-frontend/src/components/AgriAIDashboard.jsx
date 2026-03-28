@@ -7,7 +7,7 @@ const TOOL_OPTIONS = [
   'Drip Irrigation',
   'Pest Trap',
   'Compost Bin',
-  'Water Filter',
+  'Organic Fertilizer',
   'Other'
 ]
 
@@ -59,11 +59,17 @@ async function callGemini(promptText) {
 }
 
 export default function AgriAIDashboard() {
-  const [materials, setMaterials] = useState('')
   const [goal, setGoal] = useState(TOOL_OPTIONS[0])
-  const [jugaadLoading, setJugaadLoading] = useState(false)
-  const [jugaadError, setJugaadError] = useState('')
-  const [jugaadResponse, setJugaadResponse] = useState('')
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+  const [materialsError, setMaterialsError] = useState('')
+  const [materialsNotes, setMaterialsNotes] = useState('')
+  const [materialItems, setMaterialItems] = useState([])
+  const [selectedMaterials, setSelectedMaterials] = useState({})
+
+  const [recipeLoading, setRecipeLoading] = useState(false)
+  const [recipeError, setRecipeError] = useState('')
+  const [recipeResponse, setRecipeResponse] = useState('')
+  const [copyStatus, setCopyStatus] = useState('')
 
   const [sensor, setSensor] = useState(FALLBACK_SENSOR)
   const [advisorLoading, setAdvisorLoading] = useState(false)
@@ -126,25 +132,101 @@ export default function AgriAIDashboard() {
     }
   }, [])
 
-  const onSubmitJugaad = async (event) => {
-    event.preventDefault()
-    if (!materials.trim()) {
-      setJugaadError('Please describe available materials first.')
+  const parseChecklistItems = (text) => {
+    const lines = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+
+    const parsed = lines
+      .filter((line) => /^[\-\*\u2022]|^\d+[\.)]/.test(line))
+      .map((line) => line.replace(/^[\-\*\u2022]\s*/, '').replace(/^\d+[\.)]\s*/, '').trim())
+      .filter((line) => line.length > 0)
+
+    if (parsed.length > 0) return parsed
+
+    return lines
+      .filter((line) => !line.endsWith(':'))
+      .slice(0, 12)
+  }
+
+  const askMaterialsFromAI = async () => {
+    setMaterialsLoading(true)
+    setMaterialsError('')
+    setMaterialsNotes('')
+    setRecipeResponse('')
+    setRecipeError('')
+    setCopyStatus('')
+
+    try {
+      const prompt = `User wants to make: ${goal}\nList the materials needed in two categories:\n1. Primary materials (must have)\n2. Alternative/substitute materials (if primary not available)\nKeep it very simple, desi, low cost, village-friendly. Respond in Hinglish.`
+      const answer = await callGemini(prompt)
+      const items = parseChecklistItems(answer)
+
+      if (items.length === 0) {
+        throw new Error('AI ne checklist items return nahi kiye. Dobara try karo.')
+      }
+
+      const deduped = [...new Set(items)]
+      setMaterialItems(deduped)
+      setSelectedMaterials(Object.fromEntries(deduped.map((item) => [item, false])))
+      setMaterialsNotes(answer)
+    } catch (error) {
+      setMaterialsError(error.message || 'Materials list fetch nahi ho payi')
+      setMaterialItems([])
+      setSelectedMaterials({})
+    } finally {
+      setMaterialsLoading(false)
+    }
+  }
+
+  const toggleMaterial = (item) => {
+    setSelectedMaterials((prev) => ({
+      ...prev,
+      [item]: !prev[item]
+    }))
+  }
+
+  const buildFinalJugaad = async () => {
+    const available = materialItems.filter((item) => selectedMaterials[item])
+    const missing = materialItems.filter((item) => !selectedMaterials[item])
+
+    if (available.length === 0) {
+      setRecipeError('Kam se kam ek available material select karo.')
       return
     }
 
-    setJugaadLoading(true)
-    setJugaadError('')
-    setJugaadResponse('')
+    setRecipeLoading(true)
+    setRecipeError('')
+    setRecipeResponse('')
+    setCopyStatus('')
 
     try {
-      const prompt = `User has these materials: ${materials}\nThey want to make: ${goal}\nGive practical desi jugaad solution in Hindi/Hinglish with:\n1. Step by step instructions\n2. Cost estimate (very low budget)\n3. Tips for organic/natural alternatives\nKeep response practical and village-friendly.`
+      const prompt = `User wants to make: ${goal}\nAvailable materials: ${available.join(', ')}\nMissing materials: ${missing.join(', ') || 'None'}\n\nGive step-by-step jugaad solution using ONLY available materials.\nSuggest cheap alternatives for missing items.\nKeep it organic, natural, practical. Respond in Hinglish.`
       const answer = await callGemini(prompt)
-      setJugaadResponse(answer)
+      setRecipeResponse(answer)
     } catch (error) {
-      setJugaadError(error.message || 'Unable to get jugaad ideas right now')
+      setRecipeError(error.message || 'Final jugaad recipe generate nahi ho paya')
     } finally {
-      setJugaadLoading(false)
+      setRecipeLoading(false)
+    }
+  }
+
+  const availableCount = materialItems.filter((item) => selectedMaterials[item]).length
+  const notAvailableCount = materialItems.length - availableCount
+  const currentStep = recipeResponse
+    ? 3
+    : materialItems.length > 0
+      ? 2
+      : 1
+
+  const copyRecipe = async () => {
+    if (!recipeResponse) return
+    try {
+      await navigator.clipboard.writeText(recipeResponse)
+      setCopyStatus('Recipe copied ✅')
+    } catch {
+      setCopyStatus('Copy failed ❌')
     }
   }
 
@@ -153,47 +235,110 @@ export default function AgriAIDashboard() {
       <h1 className="text-2xl font-bold text-white">Agri Dashboard</h1>
 
       <div className="rounded-xl border border-slate-700 bg-slate-800 p-5 space-y-4">
-        <h2 className="text-xl font-semibold text-white">1. Desi Jugaad Toolkit</h2>
-        <form onSubmit={onSubmitJugaad} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm text-slate-300">Mere paas kya hai?</label>
-            <input
-              value={materials}
-              onChange={(e) => setMaterials(e.target.value)}
-              placeholder="e.g. purani balti, pipe, bottle, jute bag"
-              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-200 outline-none focus:border-emerald-400"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm text-slate-300">Kya banana chahte ho?</label>
-            <select
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-200 outline-none focus:border-emerald-400"
+        <h2 className="text-xl font-semibold text-white">Desi Jugaad Toolkit 🔧</h2>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          {[1, 2, 3].map((step) => (
+            <div
+              key={step}
+              className={[
+                'rounded-lg border px-3 py-2 text-xs font-semibold',
+                currentStep >= step
+                  ? 'border-emerald-500/60 bg-emerald-900/30 text-emerald-200'
+                  : 'border-slate-700 bg-slate-900/60 text-slate-400'
+              ].join(' ')}
             >
-              {TOOL_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
+              Step {step} {currentStep === step ? '• Active' : currentStep > step ? '• Done' : ''}
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-emerald-300">Step 1: Goal Selection</h3>
+          <label className="mb-1 block text-sm text-slate-300">Kya banana chahte hain?</label>
+          <select
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-200 outline-none focus:border-emerald-400"
+          >
+            {TOOL_OPTIONS.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
           <button
-            type="submit"
-            disabled={jugaadLoading}
+            type="button"
+            onClick={askMaterialsFromAI}
+            disabled={materialsLoading}
             className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 disabled:opacity-60"
           >
-            {jugaadLoading ? 'Soch raha hoon...' : 'Jugaad Dhundho 🔧'}
+            {materialsLoading ? 'Materials list aa rahi hai...' : 'AI se Materials Puchho 🤖'}
           </button>
-        </form>
+          {materialsError && <p className="text-sm text-rose-300">{materialsError}</p>}
+        </div>
 
-        {jugaadError && (
-          <p className="text-sm text-rose-300">{jugaadError}</p>
+        {materialItems.length > 0 && (
+          <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-emerald-300">Step 2: Material Confirmation</h3>
+            <div className="space-y-2">
+              {materialItems.map((item) => {
+                const checked = Boolean(selectedMaterials[item])
+                return (
+                  <label key={item} className="flex items-center justify-between rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200">
+                    <span className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleMaterial(item)}
+                        className="h-4 w-4 accent-emerald-500"
+                      />
+                      {item}
+                    </span>
+                    <span className={checked ? 'text-emerald-300' : 'text-rose-300'}>
+                      {checked ? 'Available ✅' : 'Not Available ❌'}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-4 text-xs text-slate-300">
+              <span>Available: <span className="font-semibold text-emerald-300">{availableCount}</span></span>
+              <span>Not Available: <span className="font-semibold text-rose-300">{notAvailableCount}</span></span>
+            </div>
+
+            <button
+              type="button"
+              onClick={buildFinalJugaad}
+              disabled={recipeLoading}
+              className="rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-slate-900 disabled:opacity-60"
+            >
+              {recipeLoading ? 'Final recipe ban rahi hai...' : 'Jugaad Banao! 🔧'}
+            </button>
+            {recipeError && <p className="text-sm text-rose-300">{recipeError}</p>}
+          </div>
         )}
 
-        {jugaadResponse && (
-          <div className="rounded-lg border border-emerald-600/40 bg-emerald-900/20 p-4">
-            <h3 className="mb-2 text-sm font-semibold text-emerald-300">AI Jugaad Suggestion</h3>
-            <pre className="whitespace-pre-wrap text-sm text-slate-100">{jugaadResponse}</pre>
+        {recipeResponse && (
+          <div className="rounded-lg border border-emerald-500/60 bg-emerald-900/20 p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-emerald-300">Step 3: Final Jugaad Recipe</h3>
+              <button
+                type="button"
+                onClick={copyRecipe}
+                className="rounded-md border border-emerald-500/50 bg-emerald-950/40 px-2 py-1 text-xs font-semibold text-emerald-200"
+              >
+                Copy Recipe
+              </button>
+            </div>
+            <pre className="whitespace-pre-wrap text-sm text-slate-100">{recipeResponse}</pre>
+            {copyStatus && <p className="mt-2 text-xs text-emerald-200">{copyStatus}</p>}
           </div>
+        )}
+
+        {materialsNotes && (
+          <details className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 text-xs text-slate-400">
+            <summary className="cursor-pointer text-slate-300">AI raw material notes</summary>
+            <pre className="mt-2 whitespace-pre-wrap">{materialsNotes}</pre>
+          </details>
         )}
       </div>
 
