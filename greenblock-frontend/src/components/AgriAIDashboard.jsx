@@ -17,7 +17,28 @@ const FALLBACK_SENSOR = {
   soil: 38
 }
 
+let lastAICallAt = 0
+
+const wait = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms)
+})
+
+const RATE_LIMIT_MESSAGE = 'Bahut saare requests ho gaye, thodi der baad try karo 🙏'
+
+const toUserAIError = (error) => {
+  const message = String(error?.message || '')
+  if (message.includes('429') || message.includes('RATE_LIMIT_429')) {
+    return RATE_LIMIT_MESSAGE
+  }
+  return message || 'AI service abhi unavailable hai'
+}
+
 const callAI = async (prompt) => {
+  const now = Date.now()
+  if (lastAICallAt && now - lastAICallAt < 2000) {
+    await wait(2000)
+  }
+
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -31,10 +52,18 @@ const callAI = async (prompt) => {
       messages: [{ role: 'user', content: prompt }]
     }),
   });
+
+  lastAICallAt = Date.now()
+
+  if (response.status === 429) {
+    throw new Error('RATE_LIMIT_429')
+  }
+
   const data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.choices[0].message.content;
-};
+  if (!response.ok) throw new Error(data?.error?.message || `OpenRouter request failed (${response.status})`)
+  if (data.error) throw new Error(data.error.message)
+  return data.choices[0].message.content
+}
 
 export default function AgriAIDashboard() {
   const [goal, setGoal] = useState(TOOL_OPTIONS[0])
@@ -74,7 +103,7 @@ export default function AgriAIDashboard() {
       const answer = await callAI(prompt)
       setAdvisorResponse(answer)
     } catch (error) {
-      setAdvisorError(error.message || 'Farm advisor unavailable right now')
+      setAdvisorError(toUserAIError(error))
       setAdvisorResponse('Pani subah jaldi do, shaam me patte check karo, aur neem based spray ready rakho for low-cost crop protection.')
     } finally {
       setAdvisorLoading(false)
@@ -100,7 +129,6 @@ export default function AgriAIDashboard() {
 
       if (!cancelled) {
         setSensor(snapshot)
-        await runFarmAdvisor(snapshot)
       }
     }
 
@@ -150,7 +178,7 @@ export default function AgriAIDashboard() {
       setSelectedMaterials(Object.fromEntries(deduped.map((item) => [item, false])))
       setMaterialsNotes(answer)
     } catch (error) {
-      setMaterialsError(error.message || 'Materials list fetch nahi ho payi')
+      setMaterialsError(toUserAIError(error) || 'Materials list fetch nahi ho payi')
       setMaterialItems([])
       setSelectedMaterials({})
     } finally {
@@ -184,7 +212,7 @@ export default function AgriAIDashboard() {
       const answer = await callAI(prompt)
       setRecipeResponse(answer)
     } catch (error) {
-      setRecipeError(error.message || 'Final jugaad recipe generate nahi ho paya')
+      setRecipeError(toUserAIError(error) || 'Final jugaad recipe generate nahi ho paya')
     } finally {
       setRecipeLoading(false)
     }
