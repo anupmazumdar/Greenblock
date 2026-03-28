@@ -31,7 +31,7 @@ async function callOpenRouter(promptText) {
       'HTTP-Referer': 'https://greenblock.anupmazumdar.me',
     },
     body: JSON.stringify({
-      model: 'deepseek/deepseek-r1:free',
+      model: 'google/gemma-3-27b-it:free',
       messages: [{ role: 'user', content: promptText }]
     })
   })
