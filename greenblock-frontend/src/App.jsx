@@ -23,6 +23,7 @@ export default function App() {
 
 function AppShell() {
   const location = useLocation()
+  const [cacheBanner, setCacheBanner] = useState(null)
   const [mode, setMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem('greenblock_mode')
@@ -51,6 +52,25 @@ function AppShell() {
     }
   }, [mode])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+
+    const handleCacheStatus = (event) => {
+      const detail = event?.detail || {}
+      if (detail.type === 'live' || !detail.message) {
+        setCacheBanner(null)
+        return
+      }
+      setCacheBanner({
+        message: detail.message,
+        type: detail.type || 'info'
+      })
+    }
+
+    window.addEventListener('greenblock-cache-status', handleCacheStatus)
+    return () => window.removeEventListener('greenblock-cache-status', handleCacheStatus)
+  }, [])
+
   const handleModeChange = (nextMode) => {
     if (nextMode === mode) {
       return
@@ -62,6 +82,16 @@ function AppShell() {
   return (
     <div className="min-h-screen bg-slate-900">
       <Navbar mode={mode} onModeChange={handleModeChange} />
+      {cacheBanner && (
+        <div className={[
+          'mx-auto max-w-7xl mt-4 rounded-lg border px-4 py-2 text-sm',
+          cacheBanner.type === 'error'
+            ? 'border-rose-700 bg-rose-950/40 text-rose-200'
+            : 'border-amber-700 bg-amber-950/40 text-amber-100'
+        ].join(' ')}>
+          {cacheBanner.message}
+        </div>
+      )}
       <main key={mode} className="mode-fade-enter max-w-7xl mx-auto px-4 py-6">
         <Routes>
           {mode === 'agriblock' ? (

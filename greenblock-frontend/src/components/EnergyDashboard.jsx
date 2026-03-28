@@ -6,6 +6,66 @@ import {
 } from 'recharts'
 import { getSensors, getSensorHistory } from '../utils/api'
 
+const DEMO_DATA = {
+  temperature: 24.5,
+  humidity: 62,
+  solarVoltage: 4.2,
+  solarPower: 180,
+  relay: 'ON',
+  occupancy: 'Occupied'
+}
+
+function isAllZeroSensorValues(data) {
+  if (!data || typeof data !== 'object') return false
+
+  const temp = Number(data.temp ?? 0)
+  const humidity = Number(data.humidity ?? 0)
+  const solarVoltage = Number(data.solar_v ?? 0)
+  const solarPower = Number(data.solar_mw ?? 0)
+
+  return temp === 0 && humidity === 0 && solarVoltage === 0 && solarPower === 0
+}
+
+function isAllZeroHistoryValues(items) {
+  if (!Array.isArray(items) || items.length === 0) return false
+
+  return items.every((d) => {
+    const temp = Number(d?.temp ?? 0)
+    const humidity = Number(d?.humidity ?? 0)
+    const solar = Number(d?.solar_mw ?? 0)
+    return temp === 0 && humidity === 0 && solar === 0
+  })
+}
+
+function buildDemoSensorSnapshot() {
+  return {
+    temp: DEMO_DATA.temperature,
+    humidity: DEMO_DATA.humidity,
+    solar_v: DEMO_DATA.solarVoltage,
+    solar_mw: DEMO_DATA.solarPower,
+    relay: String(DEMO_DATA.relay).toUpperCase() === 'ON',
+    occupancy: String(DEMO_DATA.occupancy).toLowerCase() === 'occupied',
+    source: 'demo',
+    timestamp: new Date().toISOString()
+  }
+}
+
+function buildDemoHistory(points = 24) {
+  const now = Date.now()
+  return Array.from({ length: points }, (_, idx) => {
+    const minutesBack = (points - 1 - idx) * 5
+    const time = new Date(now - minutesBack * 60 * 1000)
+    const wobble = Math.sin(idx / 3)
+
+    return {
+      time: time.toISOString().slice(11, 16),
+      temp: Number((DEMO_DATA.temperature + wobble * 0.8).toFixed(1)),
+      solar: Math.max(40, Math.round(DEMO_DATA.solarPower + wobble * 25)),
+      humidity: Math.max(45, Math.round(DEMO_DATA.humidity - wobble * 5)),
+    }
+  })
+}
+
 function SensorCard({ label, value, unit, icon, color }) {
   return (
     <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
@@ -25,42 +85,52 @@ export default function EnergyDashboard() {
   const [latest, setLatest] = useState(null)
   const [history, setHistory] = useState([])
   const [apiOnline, setApiOnline] = useState(true)
+  const [demoMode, setDemoMode] = useState(false)
+  const [latestLive, setLatestLive] = useState(false)
 
-  const CACHE_LATEST_KEY = 'greenblock_latest_sensor'
-  const CACHE_HISTORY_KEY = 'greenblock_sensor_history'
-
-  const loadCache = () => {
-    try {
-      const cachedLatest = localStorage.getItem(CACHE_LATEST_KEY)
-      const cachedHistory = localStorage.getItem(CACHE_HISTORY_KEY)
-      if (cachedLatest) {
-        setLatest(JSON.parse(cachedLatest))
-      }
-      if (cachedHistory) {
-        setHistory(JSON.parse(cachedHistory))
-      }
-    } catch (e) {
-      console.warn('Failed to load sensor cache', e)
-    }
+  const applyDemoMode = () => {
+    setLatest(buildDemoSensorSnapshot())
+    setHistory(buildDemoHistory())
+    setApiOnline(false)
+    setDemoMode(true)
+    setLatestLive(false)
   }
 
   const fetchLatest = async () => {
     try {
       const res = await getSensors()
+
+      if (res.__cacheMeta?.isCached || isAllZeroSensorValues(res.data)) {
+        applyDemoMode()
+        return
+      }
+
       setLatest(res.data)
       setApiOnline(true)
-      localStorage.setItem(CACHE_LATEST_KEY, JSON.stringify(res.data))
+      setDemoMode(false)
+      setLatestLive(true)
     } catch (e) {
       console.error(e)
-      setApiOnline(false)
+      applyDemoMode()
     }
   }
 
   const fetchHistory = async () => {
     try {
       const res = await getSensorHistory()
+      const raw = Array.isArray(res.data?.data) ? res.data.data.slice(-24) : []
+
+      if (res.__cacheMeta?.isCached || isAllZeroHistoryValues(raw)) {
+        // Keep cards on live data if available, only chart falls back.
+        setHistory(buildDemoHistory())
+        setApiOnline(false)
+        if (!latestLive) {
+          setDemoMode(true)
+        }
+        return
+      }
+
       // Take last 24 points for charts (last 2 hours)
-      const raw = res.data.data.slice(-24)
       const mapped = raw.map((d) => ({
         time: d.timestamp.slice(11, 16),
         temp: d.temp,
@@ -68,27 +138,38 @@ export default function EnergyDashboard() {
         humidity: d.humidity,
       }))
       setHistory(mapped)
-      localStorage.setItem(CACHE_HISTORY_KEY, JSON.stringify(mapped))
+      if (latestLive) {
+        setApiOnline(true)
+        setDemoMode(false)
+      }
     } catch (e) {
       console.error(e)
-      setApiOnline(false)
+      setHistory(buildDemoHistory())
+      if (!latestLive) {
+        setApiOnline(false)
+        setDemoMode(true)
+      }
     }
   }
 
   useEffect(() => {
-    loadCache()
     fetchLatest()
     fetchHistory()
     // Auto-refresh every 5 seconds
     const interval = setInterval(fetchLatest, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [latestLive])
 
   const hasLatest = latest !== null
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-white">⚡ Energy Dashboard</h1>
+      {demoMode && (
+        <div className="rounded-lg border border-amber-700 bg-amber-950/40 px-4 py-2 text-sm text-amber-100">
+          Demo Mode — Connect hardware for live data
+        </div>
+      )}
 
       {/* Sensor Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

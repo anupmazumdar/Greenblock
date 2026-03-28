@@ -4,26 +4,13 @@ import { getWeather } from '../utils/api'
 export default function WeatherSidebar() {
   const [weather, setWeather] = useState(null)
   const [error, setError] = useState(false)
-  const CACHE_WEATHER_KEY = 'greenblock_weather'
-
-  const loadWeatherCache = () => {
-    try {
-      const cached = localStorage.getItem(CACHE_WEATHER_KEY)
-      if (cached) {
-        setWeather(JSON.parse(cached))
-      }
-    } catch (e) {
-      console.warn('Failed to load weather cache', e)
-    }
-  }
 
   useEffect(() => {
-    loadWeatherCache()
     getWeather()
       .then(res => {
         if (res.data.status === 'ok') {
           setWeather(res.data.data)
-          localStorage.setItem(CACHE_WEATHER_KEY, JSON.stringify(res.data.data))
+          setError(Boolean(res.__cacheMeta?.isCached))
         }
         else setError(true)
       })

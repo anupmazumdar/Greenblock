@@ -1,5 +1,9 @@
 import axios from 'axios'
 
+const CACHE_PREFIX = 'greenblock_cache_'
+const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000
+const CACHE_STATUS_EVENT = 'greenblock-cache-status'
+
 function normalizeApiBase(rawUrl) {
   if (!rawUrl || typeof rawUrl !== 'string') return null
 
@@ -49,6 +53,87 @@ const api = axios.create({
   timeout: 5000
 })
 
+function isGetRequest(method) {
+  return String(method || 'get').toLowerCase() === 'get'
+}
+
+function buildEndpointIdentifier(url, params) {
+  const path = String(url || '')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '') || 'root'
+
+  if (!params || typeof params !== 'object') {
+    return path.replace(/[^a-z0-9_-]+/gi, '_')
+  }
+
+  const query = Object.entries(params)
+    .filter(([, value]) => value !== undefined && value !== null)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${String(value)}`)
+    .join('&')
+
+  const raw = query ? `${path}?${query}` : path
+  return raw.replace(/[^a-z0-9_-]+/gi, '_')
+}
+
+function cacheKeyFor(endpoint) {
+  return `${CACHE_PREFIX}${endpoint}`
+}
+
+function dispatchCacheStatus(message, type = 'info') {
+  if (typeof window === 'undefined') return
+
+  window.dispatchEvent(new CustomEvent(CACHE_STATUS_EVENT, {
+    detail: { message, type }
+  }))
+}
+
+function writeCache(endpoint, data) {
+  if (typeof window === 'undefined') return
+
+  try {
+    const payload = {
+      timestamp: Date.now(),
+      data
+    }
+    window.localStorage.setItem(cacheKeyFor(endpoint), JSON.stringify(payload))
+  } catch {
+    // Ignore cache write failures (e.g. private mode or quota full).
+  }
+}
+
+function readCache(endpoint) {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const raw = window.localStorage.getItem(cacheKeyFor(endpoint))
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    if (typeof parsed.timestamp !== 'number') return null
+    if (!Object.prototype.hasOwnProperty.call(parsed, 'data')) return null
+
+    const ageMs = Date.now() - parsed.timestamp
+    if (ageMs > CACHE_MAX_AGE_MS) {
+      window.localStorage.removeItem(cacheKeyFor(endpoint))
+      return null
+    }
+
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function formatCacheTime(timestamp) {
+  try {
+    return new Date(timestamp).toLocaleString()
+  } catch {
+    return 'recently'
+  }
+}
+
 function isRetryableError(error) {
   if (!error.response) return true
   const { status } = error.response
@@ -60,6 +145,10 @@ async function requestWithFailover(config) {
   const { validate } = config
   const requestConfig = { ...config }
   delete requestConfig.validate
+
+  const method = requestConfig.method || 'get'
+  const isGet = isGetRequest(method)
+  const endpoint = buildEndpointIdentifier(requestConfig.url, requestConfig.params)
 
   for (const baseURL of dedupedBaseCandidates) {
     try {
@@ -75,6 +164,16 @@ async function requestWithFailover(config) {
         throw new Error(`Unexpected API schema from ${baseURL}`)
       }
 
+      if (isGet) {
+        writeCache(endpoint, response.data)
+        dispatchCacheStatus('', 'live')
+      }
+
+      response.__cacheMeta = {
+        isCached: false,
+        endpoint
+      }
+
       if (api.defaults.baseURL !== baseURL) {
         api.defaults.baseURL = baseURL
       }
@@ -85,6 +184,28 @@ async function requestWithFailover(config) {
         throw error
       }
     }
+  }
+
+  if (isGet) {
+    const cached = readCache(endpoint)
+    if (cached) {
+      dispatchCacheStatus(`Showing cached data from ${formatCacheTime(cached.timestamp)}`, 'cached')
+      return {
+        data: cached.data,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: requestConfig,
+        __cacheMeta: {
+          isCached: true,
+          endpoint,
+          cachedAt: cached.timestamp
+        }
+      }
+    }
+
+    dispatchCacheStatus('No cached data available', 'error')
+    throw new Error('No cached data available')
   }
 
   throw lastError

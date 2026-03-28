@@ -2,6 +2,7 @@ import random
 from datetime import datetime, timedelta
 from fastapi import APIRouter
 from pydantic import BaseModel
+import httpx
 from data_manager import get_data_manager
 
 router = APIRouter()
@@ -9,6 +10,9 @@ router = APIRouter()
 # In-memory history store (for quick access; persisted to SQLite)
 _history: list[dict] = []
 _dm = get_data_manager()
+NASA_POWER_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
+NASA_LAT = 23.78
+NASA_LON = 86.15
 
 
 def _simulate_reading() -> dict:
@@ -48,6 +52,49 @@ def _seed_history():
         })
 
 
+async def _get_nasa_irradiance_kwh_m2_day() -> float | None:
+    """Fetch today's daily irradiance from NASA POWER (kWh/m^2/day)."""
+    today = datetime.utcnow().strftime("%Y%m%d")
+    params = {
+        "parameters": "ALLSKY_SFC_SW_DWN",
+        "community": "RE",
+        "longitude": NASA_LON,
+        "latitude": NASA_LAT,
+        "start": today,
+        "end": today,
+        "format": "JSON",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            response = await client.get(NASA_POWER_URL, params=params)
+            response.raise_for_status()
+
+        payload = response.json()
+        values = (
+            payload.get("properties", {})
+            .get("parameter", {})
+            .get("ALLSKY_SFC_SW_DWN", {})
+        )
+        if not values:
+            return None
+
+        latest_key = sorted(values.keys())[-1]
+        raw_value = values.get(latest_key)
+        value = float(raw_value)
+
+        if value < 0:
+            return None
+        return value
+    except Exception:
+        return None
+
+
+def _avg_w_m2_from_daily_kwh(irradiance_kwh_m2_day: float) -> float:
+    """Convert kWh/m^2/day to average W/m^2 across 24 hours."""
+    return (irradiance_kwh_m2_day * 1000.0) / 24.0
+
+
 # --- Schemas ---
 
 class IngestPayload(BaseModel):
@@ -56,16 +103,7 @@ class IngestPayload(BaseModel):
     solar_v: float
     solar_mw: float
     occupancy: int
-    relay1: int = 0
-    relay2: int = 0
-    distance: float = -1.0
-    sound: int = 0
-    rain: int = 0
-    co2: float = 400.0
-    door_open: int = 0
-    visitor_count: int = 0
-    laser: int = 0
-    timestamp: str = ""
+    relay: int
 
 
 class RelayCommand(BaseModel):
@@ -76,13 +114,18 @@ class RelayCommand(BaseModel):
 # --- Endpoints ---
 
 @router.get("/sensors")
-def get_latest_sensors():
-    # Return last arduino reading if available
-    for record in reversed(_history):
-        if record.get("source") == "arduino":
-            return record
-    # Fallback to simulated
+async def get_latest_sensors():
     reading = _simulate_reading()
+
+    if float(reading.get("solar_mw", 0) or 0) <= 0:
+        irradiance_kwh = await _get_nasa_irradiance_kwh_m2_day()
+        if irradiance_kwh is not None:
+            avg_w_m2 = _avg_w_m2_from_daily_kwh(irradiance_kwh)
+            reading["solar_mw"] = round(avg_w_m2, 1)
+            reading["solar_v"] = round(max(0.5, min(5.0, avg_w_m2 / 100.0)), 2)
+            reading["solar_irradiance_kwh_m2_day"] = round(irradiance_kwh, 3)
+            reading["source"] = "nasa_power_fallback"
+
     _history.append(reading)
     return reading
 
