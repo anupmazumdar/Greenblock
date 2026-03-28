@@ -11,7 +11,7 @@ import Navbar from './components/Navbar'
 import EnergyDashboard from './components/EnergyDashboard'
 import CarbonLogger from './components/CarbonLogger'
 import HvacRecommendation from './components/HvacRecommendation'
-import AgriDashboard from './components/AgriDashboard'
+import AgriAIDashboard from './components/AgriAIDashboard'
 
 export default function App() {
   return (
@@ -76,7 +76,7 @@ function AppShell() {
       return
     }
     setMode(nextMode)
-    navigate(nextMode === 'agriblock' ? '/agri' : '/', { replace: true })
+    navigate(nextMode === 'agriblock' ? '/agri/dashboard' : '/', { replace: true })
   }
 
   return (
@@ -96,9 +96,10 @@ function AppShell() {
         <Routes>
           {mode === 'agriblock' ? (
             <>
-              <Route path="/" element={<AgriDashboard />} />
-              <Route path="/agri" element={<AgriDashboard />} />
-              <Route path="*" element={<Navigate to="/agri" replace />} />
+              <Route path="/" element={<Navigate to="/agri/dashboard" replace />} />
+              <Route path="/agri" element={<Navigate to="/agri/dashboard" replace />} />
+              <Route path="/agri/dashboard" element={<AgriAIDashboard />} />
+              <Route path="*" element={<Navigate to="/agri/dashboard" replace />} />
             </>
           ) : (
             <>
