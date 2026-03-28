@@ -54,7 +54,16 @@ class IngestPayload(BaseModel):
     solar_v: float
     solar_mw: float
     occupancy: int
-    relay: int
+    relay1: int = 0
+    relay2: int = 0
+    distance: float = -1.0
+    sound: int = 0
+    rain: int = 0
+    co2: float = 400.0
+    door_open: int = 0
+    visitor_count: int = 0
+    laser: int = 0
+    timestamp: str = ""
 
 
 class RelayCommand(BaseModel):
@@ -66,6 +75,11 @@ class RelayCommand(BaseModel):
 
 @router.get("/sensors")
 def get_latest_sensors():
+    # Return last arduino reading if available
+    for record in reversed(_history):
+        if record.get("source") == "arduino":
+            return record
+    # Fallback to simulated
     reading = _simulate_reading()
     _history.append(reading)
     return reading
