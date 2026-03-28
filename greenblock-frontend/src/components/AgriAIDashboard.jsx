@@ -17,45 +17,37 @@ const FALLBACK_SENSOR = {
   soil: 38
 }
 
-function extractGeminiText(payload) {
-  const parts = payload?.candidates?.[0]?.content?.parts
-  if (!Array.isArray(parts)) return ''
-  return parts.map((part) => part?.text || '').join('\n').trim()
-}
-
-async function callGemini(promptText) {
-  const key = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY
+async function callOpenRouter(promptText) {
+  const key = import.meta.env.VITE_OPENROUTER_API_KEY
   if (!key) {
-    throw new Error('Gemini API key not found in VITE_GEMINI_API_KEY or VITE_GOOGLE_API_KEY')
+    throw new Error('OpenRouter API key not found in VITE_OPENROUTER_API_KEY')
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`
-  const response = await fetch(url, {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://greenblock.anupmazumdar.me',
     },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: promptText }] }],
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 600
-      }
+      model: 'mistralai/mistral-7b-instruct:free',
+      messages: [{ role: 'user', content: promptText }]
     })
   })
 
   const data = await response.json()
   if (!response.ok) {
-    const message = data?.error?.message || 'Gemini request failed'
+    const message = data?.error?.message || 'OpenRouter request failed'
     throw new Error(message)
   }
 
-  const text = extractGeminiText(data)
+  const text = data?.choices?.[0]?.message?.content
   if (!text) {
-    throw new Error('Empty response from Gemini')
+    throw new Error('Empty response from OpenRouter')
   }
 
-  return text
+  return String(text).trim()
 }
 
 export default function AgriAIDashboard() {
@@ -93,7 +85,7 @@ export default function AgriAIDashboard() {
         : Number((Number(nextSensor.humidity || 0) * 0.6).toFixed(1))
 
       const prompt = `Current farm sensor snapshot:\nTemperature: ${nextSensor.temp} C\nHumidity: ${nextSensor.humidity}%\nSoil moisture: ${nextSoilMoisture}%\n\nGive AI-based practical recommendations in Hindi/Hinglish for:\n1. Irrigation timing\n2. Crop health action\n3. Pest prevention\n4. One low-budget next step for today\nKeep it concise and village-friendly.`
-      const answer = await callGemini(prompt)
+      const answer = await callOpenRouter(prompt)
       setAdvisorResponse(answer)
     } catch (error) {
       setAdvisorError(error.message || 'Farm advisor unavailable right now')
@@ -160,7 +152,7 @@ export default function AgriAIDashboard() {
 
     try {
       const prompt = `User wants to make: ${goal}\nList the materials needed in two categories:\n1. Primary materials (must have)\n2. Alternative/substitute materials (if primary not available)\nKeep it very simple, desi, low cost, village-friendly. Respond in Hinglish.`
-      const answer = await callGemini(prompt)
+      const answer = await callOpenRouter(prompt)
       const items = parseChecklistItems(answer)
 
       if (items.length === 0) {
@@ -203,7 +195,7 @@ export default function AgriAIDashboard() {
 
     try {
       const prompt = `User wants to make: ${goal}\nAvailable materials: ${available.join(', ')}\nMissing materials: ${missing.join(', ') || 'None'}\n\nGive step-by-step jugaad solution using ONLY available materials.\nSuggest cheap alternatives for missing items.\nKeep it organic, natural, practical. Respond in Hinglish.`
-      const answer = await callGemini(prompt)
+      const answer = await callOpenRouter(prompt)
       setRecipeResponse(answer)
     } catch (error) {
       setRecipeError(error.message || 'Final jugaad recipe generate nahi ho paya')
