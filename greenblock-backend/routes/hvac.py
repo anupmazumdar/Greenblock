@@ -9,7 +9,7 @@ load_dotenv()
 router = APIRouter()
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
-CITY = "Jaipur"  # Change to your building's city
+CITY = os.getenv("OWM_CITY", "Jaipur")
 
 
 def _get_weather() -> dict | None:
@@ -134,11 +134,17 @@ def get_hvac_recommendation(
 
 @router.get("/weather")
 def get_weather():
-    """Return current weather + simple 6hr forecast."""
+    """Return current weather + simple 6hr forecast.
+
+    Always returns usable data for dashboard continuity.
+    """
     weather = _get_weather()
     if not weather:
+        fallback = _get_forecast(24.0)
         return {
-            "status": "unavailable",
-            "note": "Set WEATHER_API_KEY in .env to enable live weather."
+            "status": "ok",
+            "data": fallback,
+            "source": "simulated",
+            "note": "Using simulated weather. Set WEATHER_API_KEY in .env to enable live weather."
         }
-    return {"status": "ok", "data": weather}
+    return {"status": "ok", "data": weather, "source": "live"}
