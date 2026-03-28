@@ -29,7 +29,7 @@ async function callGemini(promptText) {
     throw new Error('Gemini API key not found in VITE_GEMINI_API_KEY or VITE_GOOGLE_API_KEY')
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`
   const response = await fetch(url, {
     method: 'POST',
     headers: {
