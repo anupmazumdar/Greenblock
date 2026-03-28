@@ -24,12 +24,12 @@ const callAI = async (prompt) => {
       'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
       'HTTP-Referer': 'https://greenblock.anupmazumdar.me',
       'X-OpenRouter-Title': 'GreenBlock AgriAI',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       model: 'meta-llama/llama-3.3-70b-instruct:free',
       messages: [{ role: 'user', content: prompt }]
-    })
+    }),
   });
   const data = await response.json();
   if (data.error) throw new Error(data.error.message);
