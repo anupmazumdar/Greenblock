@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from data_manager import get_data_manager
 import os
 import random
 import requests
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,6 +15,9 @@ _active_crop = "wheat"
 _dm = get_data_manager()
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 OWM_CITY = os.getenv("OWM_CITY", "Jaipur")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 def _get_weather_snapshot() -> dict:
@@ -49,6 +53,11 @@ def _get_weather_snapshot() -> dict:
 
 class CropPayload(BaseModel):
     crop: str
+
+
+class AgriJugaadPayload(BaseModel):
+    goal: str
+    context: str | None = None
 
 
 @router.get("/agri/recommendation")
@@ -151,3 +160,52 @@ def set_crop(payload: CropPayload):
 @router.get("/agri/tank-level")
 def get_tank_level():
     return {"distance_cm": 42, "status": "ok"}
+
+
+@router.post("/agri/jugaad")
+async def get_jugaad_advice(payload: AgriJugaadPayload):
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
+
+    goal = payload.goal.strip()
+    context = (payload.context or "").strip()
+    if not goal:
+        raise HTTPException(status_code=400, detail="goal is required")
+
+    prompt = f"Goal: {goal}\n"
+    if context:
+        prompt += f"Context: {context}\n"
+    prompt += "Give practical, low-cost, village-friendly Hinglish guidance."
+
+    request_body = {
+        "model": OPENROUTER_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "X-OpenRouter-Title": "GreenBlock AgriAI",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.post(OPENROUTER_URL, json=request_body, headers=headers)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"OpenRouter request failed: {exc}") from exc
+
+    if response.status_code >= 400:
+        detail = response.text
+        try:
+            data = response.json()
+            detail = data.get("error", {}).get("message") or detail
+        except ValueError:
+            pass
+        raise HTTPException(status_code=response.status_code, detail=detail)
+
+    try:
+        data = response.json()
+        result = data["choices"][0]["message"]["content"]
+    except (ValueError, KeyError, IndexError, TypeError) as exc:
+        raise HTTPException(status_code=502, detail="Invalid response from OpenRouter") from exc
+
+    return {"result": result}

@@ -17,6 +17,12 @@ const FALLBACK_SENSOR = {
   soil: 38
 }
 
+const API_BASE_URL = String(import.meta.env.VITE_API_URL || '')
+  .trim()
+  .replace(/\/+$/, '')
+  .replace(/\/api$/i, '')
+const JUGAAD_ENDPOINT = API_BASE_URL ? `${API_BASE_URL}/api/agri/jugaad` : '/api/agri/jugaad'
+
 let lastAICallAt = 0
 
 const wait = (ms) => new Promise((resolve) => {
@@ -33,25 +39,22 @@ const toUserAIError = (error) => {
   return message || 'AI service abhi unavailable hai'
 }
 
-const callAI = async (prompt) => {
+const callAI = async (goal, prompt) => {
   const now = Date.now()
   if (lastAICallAt && now - lastAICallAt < 2000) {
     await wait(2000)
   }
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const response = await fetch(JUGAAD_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-      'HTTP-Referer': 'https://greenblock.anupmazumdar.me',
-      'X-OpenRouter-Title': 'GreenBlock AgriAI',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-3.3-70b-instruct:free',
-      messages: [{ role: 'user', content: prompt }]
-    }),
-  });
+      goal: goal,
+      context: prompt
+    })
+  })
 
   lastAICallAt = Date.now()
 
@@ -59,10 +62,14 @@ const callAI = async (prompt) => {
     throw new Error('RATE_LIMIT_429')
   }
 
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || `OpenRouter request failed (${response.status})`)
-  if (data.error) throw new Error(data.error.message)
-  return data.choices[0].message.content
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data?.detail || `Agri AI request failed (${response.status})`)
+  }
+  if (!data?.result) {
+    throw new Error('Agri AI response invalid')
+  }
+  return data.result
 }
 
 export default function AgriAIDashboard() {
@@ -100,7 +107,7 @@ export default function AgriAIDashboard() {
         : Number((Number(nextSensor.humidity || 0) * 0.6).toFixed(1))
 
       const prompt = `Current farm sensor snapshot:\nTemperature: ${nextSensor.temp} C\nHumidity: ${nextSensor.humidity}%\nSoil moisture: ${nextSoilMoisture}%\n\nGive AI-based practical recommendations in Hindi/Hinglish for:\n1. Irrigation timing\n2. Crop health action\n3. Pest prevention\n4. One low-budget next step for today\nKeep it concise and village-friendly.`
-      const answer = await callAI(prompt)
+      const answer = await callAI('Farm Advisor', prompt)
       setAdvisorResponse(answer)
     } catch (error) {
       setAdvisorError(toUserAIError(error))
@@ -166,7 +173,7 @@ export default function AgriAIDashboard() {
 
     try {
       const prompt = `User wants to make: ${goal}\nList the materials needed in two categories:\n1. Primary materials (must have)\n2. Alternative/substitute materials (if primary not available)\nKeep it very simple, desi, low cost, village-friendly. Respond in Hinglish.`
-      const answer = await callAI(prompt)
+      const answer = await callAI(goal, prompt)
       const items = parseChecklistItems(answer)
 
       if (items.length === 0) {
@@ -209,7 +216,7 @@ export default function AgriAIDashboard() {
 
     try {
       const prompt = `User wants to make: ${goal}\nAvailable materials: ${available.join(', ')}\nMissing materials: ${missing.join(', ') || 'None'}\n\nGive step-by-step jugaad solution using ONLY available materials.\nSuggest cheap alternatives for missing items.\nKeep it organic, natural, practical. Respond in Hinglish.`
-      const answer = await callAI(prompt)
+      const answer = await callAI(goal, prompt)
       setRecipeResponse(answer)
     } catch (error) {
       setRecipeError(toUserAIError(error) || 'Final jugaad recipe generate nahi ho paya')
