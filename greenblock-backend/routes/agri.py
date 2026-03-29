@@ -55,11 +55,6 @@ class CropPayload(BaseModel):
     crop: str
 
 
-class AgriJugaadPayload(BaseModel):
-    goal: str
-    context: str | None = None
-
-
 @router.get("/agri/recommendation")
 def get_agri_recommendation():
     """Get crop recommendation using hybrid live + Kaggle fallback."""
@@ -163,33 +158,39 @@ def get_tank_level():
 
 
 @router.post("/agri/jugaad")
-async def get_jugaad_advice(payload: AgriJugaadPayload):
+async def jugaad_advisor(payload: dict):
     if not OPENROUTER_API_KEY:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY is not configured")
 
-    goal = payload.goal.strip()
-    context = (payload.context or "").strip()
+    goal = str(payload.get("goal", "")).strip()
+    context = str(payload.get("context", "")).strip()
     if not goal:
         raise HTTPException(status_code=400, detail="goal is required")
 
-    prompt = f"Goal: {goal}\n"
-    if context:
-        prompt += f"Context: {context}\n"
-    prompt += "Give practical, low-cost, village-friendly Hinglish guidance."
+    prompt = f"""User wants to make: {goal}
+Context: {context}
 
-    request_body = {
-        "model": OPENROUTER_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-    }
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "X-OpenRouter-Title": "GreenBlock AgriAI",
-    }
+Give practical desi jugaad solution in Hinglish:
+1. Materials needed (very cheap/scrap)
+2. Step by step instructions
+3. Organic/natural tips
+Keep it village-friendly and practical."""
 
     try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
-            response = await client.post(OPENROUTER_URL, json=request_body, headers=headers)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                OPENROUTER_URL,
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "HTTP-Referer": "https://greenblock.anupmazumdar.me",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": OPENROUTER_MODEL,
+                    "messages": [{"role": "user", "content": prompt}]
+                },
+                timeout=30
+            )
     except httpx.HTTPError as exc:
         raise HTTPException(status_code=502, detail=f"OpenRouter request failed: {exc}") from exc
 

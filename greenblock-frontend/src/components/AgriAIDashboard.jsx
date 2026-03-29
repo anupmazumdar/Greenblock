@@ -39,7 +39,7 @@ const toUserAIError = (error) => {
   return message || 'AI service abhi unavailable hai'
 }
 
-const callAI = async (goal, prompt) => {
+const callAI = async (selectedGoal, context = '') => {
   const now = Date.now()
   if (lastAICallAt && now - lastAICallAt < 2000) {
     await wait(2000)
@@ -51,8 +51,8 @@ const callAI = async (goal, prompt) => {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      goal: goal,
-      context: prompt
+      goal: selectedGoal,
+      context
     })
   })
 
