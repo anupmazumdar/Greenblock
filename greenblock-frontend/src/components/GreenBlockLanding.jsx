@@ -294,7 +294,7 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) 
   const footerLedgerStatus = isAgriMode
     ? 'LEDGER ACTIVE · TRACEABILITY NETWORK'
     : 'LEDGER ACTIVE · HYPERLEDGER SAWTOOTH'
-  const devpostHref = 'https://devpost.com/software/greenblock'
+  const devpostHref = 'https://anupmazumdar.me'
   const devpostLabel = isAgriMode ? 'View Shared Devpost' : 'View on Devpost'
   const modeToggleLabel = isAgriMode ? 'Switch to GreenBlock' : 'Switch to AgriBlock'
 
