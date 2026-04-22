@@ -164,7 +164,7 @@ export default function EnergyDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">⚡ Energy Dashboard</h1>
+      <h1 className="text-2xl font-bold text-white">⚡ GreenBlock Dashboard</h1>
       {demoMode && (
         <div className="rounded-lg border border-amber-700 bg-amber-950/40 px-4 py-2 text-sm text-amber-100">
           Demo Mode — Connect hardware for live data
