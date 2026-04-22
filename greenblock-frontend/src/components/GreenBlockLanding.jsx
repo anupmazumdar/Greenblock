@@ -240,7 +240,7 @@ const agriTechTags = [
   'Sustainability Reporting',
 ]
 
-export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) {
+export default function GreenBlockLanding({ variant = 'greenblock', onToggle, onOpenDashboard }) {
   const canvasRef = useRef(null)
   const prefersReducedMotion = usePrefersReducedMotion()
   const isAgriMode = variant === 'agriblock'
@@ -297,6 +297,8 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) 
   const devpostHref = 'https://anupmazumdar.me'
   const devpostLabel = isAgriMode ? 'View Shared Devpost' : 'View on Devpost'
   const modeToggleLabel = isAgriMode ? 'Switch to GreenBlock' : 'Switch to AgriBlock'
+  const dashboardButtonLabel = isAgriMode ? 'Open AgriBlock Dashboard' : 'Open GreenBlock Dashboard'
+  const hasDashboardAction = typeof onOpenDashboard === 'function'
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -467,6 +469,14 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) 
           >
             {modeToggleLabel}
           </button>
+          <button
+            type="button"
+            className="nav-toggle"
+            disabled={!hasDashboardAction}
+            onClick={() => onOpenDashboard?.()}
+          >
+            {dashboardButtonLabel}
+          </button>
           <a className="nav-cta" href="#cta">Get Involved</a>
         </div>
       </nav>
@@ -485,6 +495,14 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) 
             <p className="hero-sub">{heroSub}</p>
             <div className="hero-actions">
               <a href="#how" className="btn-primary">Explore the Platform →</a>
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={!hasDashboardAction}
+                onClick={() => onOpenDashboard?.()}
+              >
+                {dashboardButtonLabel}
+              </button>
               <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-secondary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -748,6 +766,14 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) 
           <h2 className="section-title">{ctaTitle}</h2>
           <p className="section-desc">{ctaSummary}</p>
           <div className="cta-actions">
+            <button
+              type="button"
+              disabled={!hasDashboardAction}
+              onClick={() => onOpenDashboard?.()}
+              className="btn-primary"
+            >
+              {dashboardButtonLabel}
+            </button>
             <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-primary">{devpostLabel}</a>
             <a href="mailto:anup@anupmazumdar.me" className="btn-secondary">Contact the Team →</a>
           </div>

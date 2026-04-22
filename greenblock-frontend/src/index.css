@@ -188,6 +188,11 @@ a {
   color: var(--ice);
 }
 
+.nav-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 main {
   position: relative;
   z-index: 1;
@@ -350,6 +355,14 @@ main {
 .btn-secondary:focus-visible {
   border-color: var(--mint);
   color: var(--ice);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .hero-visual {
