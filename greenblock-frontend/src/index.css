@@ -163,6 +163,31 @@ a {
   opacity: 0.85;
 }
 
+.nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-toggle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mint);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 0.55rem 0.95rem;
+  cursor: pointer;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  border-color: var(--mint);
+  color: var(--ice);
+}
+
 main {
   position: relative;
   z-index: 1;
@@ -390,7 +415,6 @@ main {
   border-bottom: 1px solid var(--line);
   padding: 1.5rem 5vw;
 }
-
 .stat-item {
   flex: 1;
   text-align: center;
@@ -780,6 +804,10 @@ section {
   .nav-links {
     display: none;
   }
+
+  .nav-actions {
+    margin-left: auto;
+  }
 }
 
 @media (max-width: 600px) {
@@ -829,6 +857,8 @@ section {
   .btn-primary:focus-visible,
   .btn-secondary:hover,
   .btn-secondary:focus-visible,
+  .nav-toggle:hover,
+  .nav-toggle:focus-visible,
   .nav-cta:hover,
   .nav-cta:focus-visible,
   .actor-card:hover {

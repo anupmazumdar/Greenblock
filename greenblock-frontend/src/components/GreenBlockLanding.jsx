@@ -120,9 +120,183 @@ const techTags = [
   'Direct Democracy Layer',
 ]
 
-export default function GreenBlockLanding() {
+const agriTickerItems = [
+  'IoT-Powered Soil Monitoring',
+  'Farm-to-Fork Traceability Ledger',
+  'Smart Irrigation Optimization',
+  'Climate-Resilient Crop Insights',
+  'Transparent Produce Marketplace',
+  'Farmer × Buyer × Regulator Collaboration',
+]
+
+const agriStats = [
+  { value: '120+', label: 'Pilot Farms Instrumented' },
+  { value: '98%', label: 'Crop Traceability Coverage' },
+  { value: '32%', label: 'Average Water Savings' },
+  { value: '∞', label: 'Scalable Agri Data Transactions' },
+]
+
+const agriSteps = [
+  {
+    number: '01 — BASELINE',
+    title: 'Map Field Baselines',
+    description:
+      'Farm operators establish crop, soil, and water baselines that are signed and recorded on-chain to create a trusted starting point for every season.',
+    icon: 'governance',
+  },
+  {
+    number: '02 — SENSING',
+    title: 'Collect Live Farm Signals',
+    description:
+      'Soil moisture probes, weather stations, and nutrient sensors stream verified data into the ledger in near real-time.',
+    icon: 'sensing',
+  },
+  {
+    number: '03 — ADVISORY',
+    title: 'Trigger Smart Recommendations',
+    description:
+      'Smart rules issue irrigation, fertilization, and pest-risk recommendations based on thresholds, helping farmers react before losses occur.',
+    icon: 'incentives',
+  },
+  {
+    number: '04 — MARKET',
+    title: 'Unlock Verified Trade',
+    description:
+      'Verified crop records and quality proofs travel with produce, enabling transparent pricing, better financing, and trusted procurement.',
+    icon: 'marketplace',
+  },
+]
+
+const agriFeatures = [
+  {
+    title: 'End-to-End Crop Traceability',
+    description:
+      'From field events to post-harvest checkpoints, every critical action is immutably logged for compliance and buyer trust.',
+    icon: 'shield',
+  },
+  {
+    title: 'Precision Farming Signals',
+    description:
+      'Continuous IoT telemetry provides actionable farm intelligence that reduces guesswork and improves operational decisions.',
+    icon: 'signal',
+  },
+  {
+    title: 'Farmer-Centric Dashboards',
+    description:
+      'Simple interfaces expose alerts, trends, and recommendations so farmers can act quickly from mobile or desktop devices.',
+    icon: 'screen',
+  },
+  {
+    title: 'Multi-Stakeholder Agri Network',
+    description:
+      'Farmers, buyers, cooperatives, insurers, and regulators share one trusted ledger with role-based visibility.',
+    icon: 'network',
+  },
+]
+
+const agriActors = [
+  {
+    icon: '🚜',
+    name: 'Farmers',
+    role: 'Capture field activity, receive real-time recommendations, and improve yields with verifiable agronomic records.',
+  },
+  {
+    icon: '🏪',
+    name: 'Buyers & Retailers',
+    role: 'Procure produce with trusted provenance, quality history, and transparent farm compliance evidence.',
+  },
+  {
+    icon: '🧪',
+    name: 'Agronomists',
+    role: 'Monitor farm telemetry, validate interventions, and optimize crop plans using reliable historical data.',
+  },
+  {
+    icon: '🤝',
+    name: 'Cooperatives',
+    role: 'Coordinate shared infrastructure, benchmark outcomes, and improve farmer access to services and markets.',
+  },
+  {
+    icon: '🛡️',
+    name: 'Insurers & Lenders',
+    role: 'Use immutable operational histories to underwrite risk, price premiums, and expand agricultural financing.',
+  },
+  {
+    icon: '⚖️',
+    name: 'Regulators',
+    role: 'Verify sustainability and compliance metrics through auditable records without heavy manual inspections.',
+  },
+]
+
+const agriTechTags = [
+  'Precision Agriculture',
+  'IoT Sensor Mesh',
+  'Traceability Ledger',
+  'Farm Advisory Engine',
+  'REST API',
+  'Weather + Soil Data',
+  'Distributed Ledger',
+  'Supply Chain Verification',
+  'Yield Analytics',
+  'Sustainability Reporting',
+]
+
+export default function GreenBlockLanding({ variant = 'greenblock', onToggle }) {
   const canvasRef = useRef(null)
   const prefersReducedMotion = usePrefersReducedMotion()
+  const isAgriMode = variant === 'agriblock'
+  const nextMode = isAgriMode ? 'greenblock' : 'agriblock'
+  const tickerFeed = isAgriMode ? agriTickerItems : tickerItems
+  const statsFeed = isAgriMode ? agriStats : stats
+  const stepsFeed = isAgriMode ? agriSteps : steps
+  const featuresFeed = isAgriMode ? agriFeatures : features
+  const actorsFeed = isAgriMode ? agriActors : actors
+  const techFeed = isAgriMode ? agriTechTags : techTags
+  const brandPrefix = isAgriMode ? 'Agri' : 'Green'
+  const heroTag = isAgriMode ? 'Agriculture × IoT × Traceability' : 'Blockchain × IoT × Climate Action'
+  const heroHeadlineTop = isAgriMode ? 'Cultivating the' : 'Rewarding the'
+  const heroHeadlineAccent = isAgriMode ? 'Future of Smart Farming' : "Planet's Defenders"
+  const heroHeadlineBottom = isAgriMode ? 'On-Chain' : 'On-Chain'
+  const heroSub = isAgriMode
+    ? 'AgriBlock combines IoT telemetry and blockchain traceability to help farmers optimize inputs, improve yields, and build trust across the food supply chain.'
+    : 'GreenBlock uses blockchain and IoT to create a transparent, incentive-driven ecosystem where governments, corporations, and citizens collectively reduce carbon emissions — and get rewarded for doing so.'
+  const processTitle = isAgriMode ? 'How AgriBlock Works' : 'How GreenBlock Works'
+  const processSummary = isAgriMode
+    ? 'A practical flow that combines live farm sensing, advisory logic, and verifiable records to improve outcomes from field operations to market delivery.'
+    : 'A multi-layered system combining democratic governance, IoT sensing, and blockchain automation to create accountable, incentivized climate action.'
+  const platformTitle = isAgriMode ? 'Built for Agricultural Intelligence at Scale' : 'Built for Accountability at Scale'
+  const platformSummary = isAgriMode
+    ? "AgriBlock isn't just a dashboard — it's an operational intelligence layer that connects fields, markets, and regulators with trusted real-time data."
+    : "GreenBlock isn't just a concept — it's a functional architecture that bridges the physical and digital worlds to enforce environmental accountability."
+  const ecosystemSummary = isAgriMode
+    ? 'AgriBlock unifies all agri stakeholders on one trusted network, from farm operations to post-harvest verification and downstream trade.'
+    : 'GreenBlock is designed for every level of society. Each actor has a defined role, enforced by smart contracts and verified by the distributed ledger.'
+  const technologySummary = isAgriMode
+    ? 'AgriBlock combines proven distributed-ledger infrastructure with precision-agriculture tooling to deliver reliable farm intelligence at scale.'
+    : 'GreenBlock leverages enterprise-grade blockchain technology alongside modern web tooling to deliver a secure, scalable, and auditable platform.'
+  const ctaTitle = isAgriMode
+    ? 'Build a Transparent, Data-Driven Agricultural Future'
+    : 'Join the Movement Toward a Verifiable, Incentivized Planet'
+  const ctaSummary = isAgriMode
+    ? 'AgriBlock is looking for pilot farms, cooperatives, and agri-tech partners to scale from prototype to production-ready deployments.'
+    : "GreenBlock is seeking funding, endorsement, and guidance to grow from prototype to production. Whether you're a government, corporation, or individual — there's a role for you on-chain."
+  const footerDescription = isAgriMode
+    ? 'An IoT + blockchain platform for precision agriculture, crop traceability, and trusted farm-to-market collaboration.'
+    : 'A blockchain + IoT platform incentivising environment-friendly behaviour through transparent, automated carbon credit systems.'
+  const blockRecordOne = isAgriMode ? 'FARM BASELINE SET' : 'GOV BASELINE SET'
+  const blockRecordTwo = isAgriMode ? 'FIELD READING: SOIL MOISTURE +18%' : 'IOT READING: -14% CO₂'
+  const blockRecordThree = isAgriMode ? 'ADVISORY ISSUED: IRRIGATION -12%' : 'CREDITS AWARDED: +250 CC'
+  const blockRecordFour = isAgriMode ? 'BATCH VERIFIED: FARM → BUYER' : 'CREDIT TRADE: CORP → GOV'
+  const visualNodeA = isAgriMode ? 'FARM' : 'GOV'
+  const visualNodeB = isAgriMode ? 'CO-OP' : 'CORP'
+  const visualNodeC = isAgriMode ? 'SENSOR' : 'IOT'
+  const visualNodeD = isAgriMode ? 'BUYER' : 'CITIZEN'
+  const visualNodeE = isAgriMode ? 'TRACE' : 'LEDGER'
+  const footerLedgerStatus = isAgriMode
+    ? 'LEDGER ACTIVE · TRACEABILITY NETWORK'
+    : 'LEDGER ACTIVE · HYPERLEDGER SAWTOOTH'
+  const devpostHref = 'https://devpost.com/software/greenblock'
+  const devpostLabel = isAgriMode ? 'View Shared Devpost' : 'View on Devpost'
+  const modeToggleLabel = isAgriMode ? 'Switch to GreenBlock' : 'Switch to AgriBlock'
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -216,7 +390,7 @@ export default function GreenBlockLanding() {
     })
 
     return () => observer.disconnect()
-  }, [prefersReducedMotion])
+  }, [prefersReducedMotion, variant])
 
   useEffect(() => {
     const elements = document.querySelectorAll('.stat-num')
@@ -256,7 +430,7 @@ export default function GreenBlockLanding() {
     return () => {
       intervalIds.forEach((intervalId) => window.clearInterval(intervalId))
     }
-  }, [prefersReducedMotion])
+  }, [prefersReducedMotion, variant])
 
   return (
     <div className="landing-shell">
@@ -276,7 +450,7 @@ export default function GreenBlockLanding() {
             <line x1="9" y1="13" x2="14" y2="15.5" stroke="#40ff9a" strokeWidth="1" opacity="0.5" />
           </svg>
           <span className="logo-text">
-            Green<span>Block</span>
+            {brandPrefix}<span>Block</span>
           </span>
         </a>
         <ul className="nav-links">
@@ -285,33 +459,38 @@ export default function GreenBlockLanding() {
           <li><a href="#actors">Participants</a></li>
           <li><a href="#tech">Technology</a></li>
         </ul>
-        <a className="nav-cta" href="#cta">Get Involved</a>
+        <div className="nav-actions">
+          <button
+            type="button"
+            className="nav-toggle"
+            onClick={() => onToggle?.(nextMode)}
+          >
+            {modeToggleLabel}
+          </button>
+          <a className="nav-cta" href="#cta">Get Involved</a>
+        </div>
       </nav>
 
       <main id="top">
         <section className="hero">
           <div className="hero-content">
-            <div className="hero-tag">Blockchain × IoT × Climate Action</div>
+            <div className="hero-tag">{heroTag}</div>
             <h1>
-              Rewarding the
+              {heroHeadlineTop}
               <br />
-              <span className="accent">Planet&apos;s Defenders</span>
+              <span className="accent">{heroHeadlineAccent}</span>
               <br />
-              On-Chain
+              {heroHeadlineBottom}
             </h1>
-            <p className="hero-sub">
-              GreenBlock uses blockchain and IoT to create a transparent,
-              incentive-driven ecosystem where governments, corporations, and
-              citizens collectively reduce carbon emissions — and get rewarded for doing so.
-            </p>
+            <p className="hero-sub">{heroSub}</p>
             <div className="hero-actions">
               <a href="#how" className="btn-primary">Explore the Platform →</a>
-              <a href="https://devpost.com/software/greenblock" target="_blank" rel="noreferrer" className="btn-secondary">
+              <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-secondary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
-                View on Devpost
+                {devpostLabel}
               </a>
             </div>
           </div>
@@ -383,11 +562,11 @@ export default function GreenBlockLanding() {
               <circle cx="404" cy="260" r="16" fill="#40ff9a" opacity="0.1" filter="url(#blur)" />
               <circle cx="336" cy="420" r="16" fill="#40ff9a" opacity="0.1" filter="url(#blur)" />
 
-              <text x="348" y="176" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">GOV</text>
-              <text x="416" y="256" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">CORP</text>
-              <text x="232" y="336" fontFamily="Space Mono" fontSize="9" fill="#74c69d" opacity="0.8">IOT</text>
-              <text x="484" y="336" fontFamily="Space Mono" fontSize="9" fill="#74c69d" opacity="0.8">CITIZEN</text>
-              <text x="344" y="432" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">LEDGER</text>
+              <text x="348" y="176" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">{visualNodeA}</text>
+              <text x="416" y="256" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">{visualNodeB}</text>
+              <text x="232" y="336" fontFamily="Space Mono" fontSize="9" fill="#74c69d" opacity="0.8">{visualNodeC}</text>
+              <text x="484" y="336" fontFamily="Space Mono" fontSize="9" fill="#74c69d" opacity="0.8">{visualNodeD}</text>
+              <text x="344" y="432" fontFamily="Space Mono" fontSize="9" fill="#40ff9a" opacity="0.8">{visualNodeE}</text>
 
               <circle cx="336" cy="180" r="20" fill="none" stroke="#40ff9a" strokeWidth="1" opacity="0.3">
                 {!prefersReducedMotion && (
@@ -420,7 +599,7 @@ export default function GreenBlockLanding() {
         <div className="ticker">
           <div className="ticker-track">
             {Array.from({ length: 2 }).flatMap((_, loopIndex) =>
-              tickerItems.map((item) => (
+              tickerFeed.map((item) => (
                 <span className="ticker-item" key={`${loopIndex}-${item}`}>
                   <span>✦</span>
                   {item}
@@ -431,7 +610,7 @@ export default function GreenBlockLanding() {
         </div>
 
         <div className="stats-bar">
-          {stats.map((stat) => (
+          {statsFeed.map((stat) => (
             <div className="stat-item" key={stat.label}>
               <span className="stat-num" data-final-value={stat.value}>{stat.value}</span>
               <span className="stat-label">{stat.label}</span>
@@ -441,14 +620,11 @@ export default function GreenBlockLanding() {
 
         <section className="how-it-works" id="how">
           <div className="section-label">Process</div>
-          <h2 className="section-title">How GreenBlock Works</h2>
-          <p className="section-desc">
-            A multi-layered system combining democratic governance, IoT sensing, and
-            blockchain automation to create accountable, incentivized climate action.
-          </p>
+          <h2 className="section-title">{processTitle}</h2>
+          <p className="section-desc">{processSummary}</p>
 
           <div className="steps-grid">
-            {steps.map((step) => (
+            {stepsFeed.map((step) => (
               <article className="step-card" key={step.title}>
                 <div className="step-num">{step.number}</div>
                 <div className="step-icon">{renderStepIcon(step.icon)}</div>
@@ -463,14 +639,11 @@ export default function GreenBlockLanding() {
           <div className="features-inner">
             <div>
               <div className="section-label">Platform</div>
-              <h2 className="section-title">Built for Accountability at Scale</h2>
-              <p className="section-desc">
-                GreenBlock isn&apos;t just a concept — it&apos;s a functional architecture
-                that bridges the physical and digital worlds to enforce environmental accountability.
-              </p>
+              <h2 className="section-title">{platformTitle}</h2>
+              <p className="section-desc">{platformSummary}</p>
 
               <div className="feature-list">
-                {features.map((feature) => (
+                {featuresFeed.map((feature) => (
                   <div className="feature-item" key={feature.title}>
                     <div className="feature-icon-wrap">{renderFeatureIcon(feature.icon)}</div>
                     <div className="feature-text">
@@ -494,7 +667,7 @@ export default function GreenBlockLanding() {
                 <rect x="60" y="20" width="280" height="90" fill="url(#blockGrad)" stroke="#2d6a4f" strokeWidth="1.5" rx="2" />
                 <rect x="60" y="20" width="280" height="3" fill="#40ff9a" opacity="0.7" rx="2" />
                 <text x="80" y="50" fontFamily="Space Mono" fontSize="8" fill="#40ff9a" opacity="0.7" letterSpacing="0.1em">BLOCK #00421</text>
-                <text x="80" y="68" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">GOV BASELINE SET</text>
+                <text x="80" y="68" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">{blockRecordOne}</text>
                 <text x="80" y="84" fontFamily="Space Mono" fontSize="7" fill="#74c69d" opacity="0.6">HASH: 0x8f4a2c...</text>
                 <circle cx="360" cy="65" r="8" fill="rgba(64,255,154,0.15)" stroke="#40ff9a" strokeWidth="1" />
                 <text x="356" y="69" fontFamily="Space Mono" fontSize="8" fill="#40ff9a">✓</text>
@@ -505,7 +678,7 @@ export default function GreenBlockLanding() {
                 <rect x="60" y="150" width="280" height="90" fill="url(#blockGrad)" stroke="#2d6a4f" strokeWidth="1.5" rx="2" />
                 <rect x="60" y="150" width="280" height="3" fill="#74c69d" opacity="0.7" rx="2" />
                 <text x="80" y="180" fontFamily="Space Mono" fontSize="8" fill="#74c69d" opacity="0.7" letterSpacing="0.1em">BLOCK #00422</text>
-                <text x="80" y="198" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">IOT READING: -14% CO₂</text>
+                <text x="80" y="198" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">{blockRecordTwo}</text>
                 <text x="80" y="214" fontFamily="Space Mono" fontSize="7" fill="#74c69d" opacity="0.6">HASH: 0x2e9d1f...</text>
                 <circle cx="360" cy="195" r="8" fill="rgba(64,255,154,0.15)" stroke="#40ff9a" strokeWidth="1" />
                 <text x="356" y="199" fontFamily="Space Mono" fontSize="8" fill="#40ff9a">✓</text>
@@ -516,7 +689,7 @@ export default function GreenBlockLanding() {
                 <rect x="60" y="280" width="280" height="90" fill="url(#blockGrad)" stroke="#40ff9a" strokeWidth="1.5" rx="2" />
                 <rect x="60" y="280" width="280" height="3" fill="#40ff9a" rx="2" />
                 <text x="80" y="310" fontFamily="Space Mono" fontSize="8" fill="#40ff9a" opacity="0.7" letterSpacing="0.1em">BLOCK #00423</text>
-                <text x="80" y="328" fontFamily="Space Mono" fontSize="9" fill="#40ff9a">CREDITS AWARDED: +250 CC</text>
+                <text x="80" y="328" fontFamily="Space Mono" fontSize="9" fill="#40ff9a">{blockRecordThree}</text>
                 <text x="80" y="344" fontFamily="Space Mono" fontSize="7" fill="#74c69d" opacity="0.6">HASH: 0x7a3b8e...</text>
                 <circle cx="360" cy="325" r="8" fill="rgba(64,255,154,0.3)" stroke="#40ff9a" strokeWidth="1.5" />
                 <text x="356" y="329" fontFamily="Space Mono" fontSize="8" fill="#40ff9a">✓</text>
@@ -533,7 +706,7 @@ export default function GreenBlockLanding() {
                 <rect x="60" y="410" width="280" height="90" fill="url(#blockGrad)" stroke="#2d6a4f" strokeWidth="1.5" rx="2" />
                 <rect x="60" y="410" width="280" height="3" fill="#52b788" opacity="0.7" rx="2" />
                 <text x="80" y="440" fontFamily="Space Mono" fontSize="8" fill="#52b788" opacity="0.7" letterSpacing="0.1em">BLOCK #00424</text>
-                <text x="80" y="458" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">CREDIT TRADE: CORP → GOV</text>
+                <text x="80" y="458" fontFamily="Space Mono" fontSize="9" fill="#d8f3dc">{blockRecordFour}</text>
                 <text x="80" y="474" fontFamily="Space Mono" fontSize="7" fill="#74c69d" opacity="0.6">HASH: 0xf1c4a9... (PENDING)</text>
                 <circle cx="360" cy="455" r="8" fill="rgba(82,183,136,0.1)" stroke="#52b788" strokeWidth="1" />
                 <text x="356" y="459" fontFamily="Space Mono" fontSize="8" fill="#52b788">⋯</text>
@@ -545,13 +718,10 @@ export default function GreenBlockLanding() {
         <section className="actors" id="actors">
           <div className="section-label">Ecosystem</div>
           <h2 className="section-title">Who Participates</h2>
-          <p className="section-desc">
-            GreenBlock is designed for every level of society. Each actor has a defined
-            role, enforced by smart contracts and verified by the distributed ledger.
-          </p>
+          <p className="section-desc">{ecosystemSummary}</p>
 
           <div className="actors-grid">
-            {actors.map((actor) => (
+            {actorsFeed.map((actor) => (
               <article className="actor-card" key={actor.name}>
                 <span className="actor-icon" aria-hidden="true">{actor.icon}</span>
                 <div className="actor-name">{actor.name}</div>
@@ -564,13 +734,10 @@ export default function GreenBlockLanding() {
         <section id="tech">
           <div className="section-label">Technology</div>
           <h2 className="section-title">Built on Proven Infrastructure</h2>
-          <p className="section-desc">
-            GreenBlock leverages enterprise-grade blockchain technology alongside
-            modern web tooling to deliver a secure, scalable, and auditable platform.
-          </p>
+          <p className="section-desc">{technologySummary}</p>
 
           <div className="tech-row">
-            {techTags.map((tag) => (
+            {techFeed.map((tag) => (
               <span className="tech-tag" key={tag}>{tag}</span>
             ))}
           </div>
@@ -578,14 +745,10 @@ export default function GreenBlockLanding() {
 
         <section className="cta-section" id="cta">
           <div className="section-label section-label-center">Get Involved</div>
-          <h2 className="section-title">Join the Movement Toward a Verifiable, Incentivized Planet</h2>
-          <p className="section-desc">
-            GreenBlock is seeking funding, endorsement, and guidance to grow from prototype
-            to production. Whether you&apos;re a government, corporation, or individual —
-            there&apos;s a role for you on-chain.
-          </p>
+          <h2 className="section-title">{ctaTitle}</h2>
+          <p className="section-desc">{ctaSummary}</p>
           <div className="cta-actions">
-            <a href="https://devpost.com/software/greenblock" target="_blank" rel="noreferrer" className="btn-primary">View on Devpost</a>
+            <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-primary">{devpostLabel}</a>
             <a href="mailto:anup@anupmazumdar.me" className="btn-secondary">Contact the Team →</a>
           </div>
         </section>
@@ -601,10 +764,10 @@ export default function GreenBlockLanding() {
                 <circle cx="18" cy="18" r="4" fill="#40ff9a" />
               </svg>
               <span className="logo-text">
-                Green<span>Block</span>
+                {brandPrefix}<span>Block</span>
               </span>
             </a>
-            <p>A blockchain + IoT platform incentivising environment-friendly behaviour through transparent, automated carbon credit systems.</p>
+            <p>{footerDescription}</p>
           </div>
           <div className="footer-col">
             <h5>Platform</h5>
@@ -618,7 +781,7 @@ export default function GreenBlockLanding() {
           <div className="footer-col">
             <h5>Resources</h5>
             <ul>
-              <li><a href="https://devpost.com/software/greenblock" target="_blank" rel="noreferrer">Devpost</a></li>
+              <li><a href={devpostHref} target="_blank" rel="noreferrer">Devpost</a></li>
               <li><a href="#">Documentation</a></li>
               <li><a href="#">Whitepaper</a></li>
               <li><a href="#">API Reference</a></li>
@@ -635,10 +798,10 @@ export default function GreenBlockLanding() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span className="footer-copy">© 2024 GreenBlock · Anup Mazumdar · All Rights Reserved</span>
+          <span className="footer-copy">© 2026 {brandPrefix}Block · Anup Mazumdar · All Rights Reserved</span>
           <div className="footer-chain">
             <div className="chain-dot" />
-            LEDGER ACTIVE · HYPERLEDGER SAWTOOTH
+            {footerLedgerStatus}
           </div>
         </div>
       </footer>
