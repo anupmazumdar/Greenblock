@@ -59,6 +59,11 @@ a {
 .landing-shell {
   position: relative;
   isolation: isolate;
+  --landing-nav-offset: clamp(5.75rem, 8vw, 7.5rem);
+}
+
+.landing-shell [id] {
+  scroll-margin-top: calc(var(--landing-nav-offset) + 0.75rem);
 }
 
 .hex-canvas {
@@ -198,9 +203,13 @@ main {
   z-index: 1;
 }
 
+.landing-shell > main {
+  padding-top: var(--landing-nav-offset);
+}
+
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--landing-nav-offset));
   display: flex;
   align-items: center;
   padding: 0 5vw;
@@ -209,7 +218,7 @@ main {
 
 .hero-content {
   max-width: 700px;
-  padding-top: 6rem;
+  padding-top: 1rem;
 }
 
 .hero-tag,
@@ -826,7 +835,7 @@ section {
 @media (max-width: 600px) {
   .hero {
     min-height: auto;
-    padding-top: 7rem;
+    padding-top: 0;
   }
 
   .stats-bar {

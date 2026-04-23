@@ -242,6 +242,8 @@ const agriTechTags = [
 
 export default function GreenBlockLanding({ variant = 'greenblock', onToggle, onOpenDashboard }) {
   const canvasRef = useRef(null)
+  const landingShellRef = useRef(null)
+  const topNavRef = useRef(null)
   const prefersReducedMotion = usePrefersReducedMotion()
   const isAgriMode = variant === 'agriblock'
   const nextMode = isAgriMode ? 'greenblock' : 'agriblock'
@@ -299,6 +301,34 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
   const modeToggleLabel = isAgriMode ? 'Switch to GreenBlock' : 'Switch to AgriBlock'
   const dashboardButtonLabel = isAgriMode ? 'Open AgriBlock Dashboard' : 'Open GreenBlock Dashboard'
   const hasDashboardAction = typeof onOpenDashboard === 'function'
+
+  useEffect(() => {
+    const landingShell = landingShellRef.current
+    const topNav = topNavRef.current
+
+    if (!landingShell || !topNav) {
+      return undefined
+    }
+
+    const syncNavOffset = () => {
+      const navHeight = Math.ceil(topNav.getBoundingClientRect().height)
+      landingShell.style.setProperty('--landing-nav-offset', `${navHeight + 12}px`)
+    }
+
+    syncNavOffset()
+    window.addEventListener('resize', syncNavOffset)
+
+    let resizeObserver
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(syncNavOffset)
+      resizeObserver.observe(topNav)
+    }
+
+    return () => {
+      window.removeEventListener('resize', syncNavOffset)
+      resizeObserver?.disconnect()
+    }
+  }, [variant])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -435,10 +465,10 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
   }, [prefersReducedMotion, variant])
 
   return (
-    <div className="landing-shell">
+    <div ref={landingShellRef} className="landing-shell">
       <canvas ref={canvasRef} className="hex-canvas" aria-hidden="true" />
 
-      <nav className="top-nav">
+      <nav ref={topNavRef} className="top-nav">
         <a href="#top" className="nav-logo">
           <svg className="logo-hex" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <polygon points="18,2 32,10 32,26 18,34 4,26 4,10" fill="none" stroke="#40ff9a" strokeWidth="1.5" />
