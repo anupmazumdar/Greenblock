@@ -39,7 +39,6 @@ function DashboardPage({ mode }) {
   const navigate = useNavigate()
 
   const isAgriMode = mode === 'agriblock'
-  const dashboardTitle = isAgriMode ? 'AgriBlock Dashboard' : 'GreenBlock Dashboard'
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -47,42 +46,34 @@ function DashboardPage({ mode }) {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-slate-400">GreenBlock / AgriBlock</p>
-            <h1 className="text-2xl font-bold text-white">{dashboardTitle}</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {isAgriMode ? 'AgriBlock Dashboard' : 'GreenBlock Dashboard'}
+            </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-xl border border-slate-700 bg-slate-950/80 p-1">
             <button
               type="button"
-              onClick={() => navigate(isAgriMode ? '/agriblock' : '/')}
-              className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
+              onClick={() => navigate('/dashboard/greenblock')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                !isAgriMode
+                  ? 'bg-emerald-400 text-slate-950'
+                  : 'text-slate-300 hover:bg-slate-800'
+              }`}
             >
-              Back to Website
+              GreenBlock
             </button>
-
-            <div className="inline-flex rounded-xl border border-slate-700 bg-slate-950/80 p-1">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/greenblock')}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                  !isAgriMode
-                    ? 'bg-emerald-400 text-slate-950'
-                    : 'text-slate-300 hover:bg-slate-800'
-                }`}
-              >
-                GreenBlock
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/agriblock')}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                  isAgriMode
-                    ? 'bg-green-500 text-slate-950'
-                    : 'text-slate-300 hover:bg-slate-800'
-                }`}
-              >
-                AgriBlock
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard/agriblock')}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                isAgriMode
+                  ? 'bg-green-500 text-slate-950'
+                  : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              AgriBlock
+            </button>
           </div>
         </div>
       </header>
