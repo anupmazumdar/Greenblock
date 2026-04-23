@@ -95,6 +95,18 @@ def _avg_w_m2_from_daily_kwh(irradiance_kwh_m2_day: float) -> float:
     return (irradiance_kwh_m2_day * 1000.0) / 24.0
 
 
+def _get_latest_ingested_reading() -> dict | None:
+    for record in reversed(_history):
+        if record.get("source") == "arduino":
+            return record
+
+    for record in _dm.get_sensor_history(hours=24 * 7):
+        if record.get("source") == "arduino":
+            return record
+
+    return None
+
+
 # --- Schemas ---
 
 class IngestPayload(BaseModel):
@@ -115,6 +127,10 @@ class RelayCommand(BaseModel):
 
 @router.get("/sensors")
 async def get_latest_sensors():
+    latest_ingested = _get_latest_ingested_reading()
+    if latest_ingested is not None:
+        return latest_ingested
+
     reading = _simulate_reading()
 
     if float(reading.get("solar_mw", 0) or 0) <= 0:

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import EnergyDashboard from './components/EnergyDashboard'
 import AgriDashboard from './components/AgriDashboard'
+import AgriAIDashboard from './components/AgriAIDashboard'
 import GreenBlockLanding from './components/GreenBlockLanding'
 
 export default function App() {
@@ -79,7 +80,14 @@ function DashboardPage({ mode }) {
       </header>
 
       <section className="mx-auto max-w-7xl px-6 py-6">
-        {isAgriMode ? <AgriDashboard /> : <EnergyDashboard />}
+        {isAgriMode ? (
+          <div className="space-y-6">
+            <AgriDashboard />
+            <AgriAIDashboard />
+          </div>
+        ) : (
+          <EnergyDashboard />
+        )}
       </section>
     </main>
   )
