@@ -3,7 +3,7 @@
  * Displays carbon savings, air quality, and logging functionality
  */
 import { useEffect, useState } from 'react'
-import { getCarbonSavings, getAirQuality } from '../utils/api'
+import { getCarbonSavings, getAirQuality } from '../../utils/api'
 
 export default function CarbonSection() {
   const [carbonSavings, setCarbonSavings] = useState(null)

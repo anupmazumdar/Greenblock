@@ -3,7 +3,7 @@
  * Displays sensor data, charts, and energy metrics for the GreenBlock Energy dashboard
  */
 import { useEffect, useState } from 'react'
-import { getEnergyScore, getGridDependency } from '../utils/api'
+import { getEnergyScore, getGridDependency } from '../../utils/api'
 
 export default function EnergySection() {
   const [tempData, setTempData] = useState([])

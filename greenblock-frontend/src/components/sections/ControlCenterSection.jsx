@@ -10,7 +10,7 @@ import {
   getAgriTankLevel,
   setAgriCrop,
   getSensors
-} from '../utils/api'
+} from '../../utils/api'
 
 const DUMMY = {
   recommendation: { crop: 'wheat', risk: 'medium', recommendation: 'Humidity high. Evening me neem spray recommended.' },

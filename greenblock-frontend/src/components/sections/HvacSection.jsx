@@ -3,7 +3,7 @@
  * Displays HVAC recommendations and control suggestions
  */
 import { useEffect, useState } from 'react'
-import { getHvacRecommendation, getSensors } from '../utils/api'
+import { getHvacRecommendation, getSensors } from '../../utils/api'
 
 export default function HvacSection() {
   const [hvacRec, setHvacRec] = useState(null)
