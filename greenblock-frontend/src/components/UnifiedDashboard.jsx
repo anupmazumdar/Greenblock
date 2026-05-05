@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
-import { getWeather, getAgriRecommendation, getAgriIrrigationStatus, getAgriDiseaseRisk, getAgriTankLevel, getSensors } from '../utils/api'
+import { getWeather } from '../utils/api'
+import GreenBlockDashboard from './GreenBlockDashboard'
+import AgriBlockDashboard from './AgriBlockDashboard'
+import TabNavigation from './TabNavigation'
 
 export default function UnifiedDashboard({ mode = 'greenblock' }) {
   const [tab, setTab] = useState(mode === 'agriblock' ? 'agri' : 'green')
   const [weather, setWeather] = useState(null)
-  const [tick, setTick] = useState(0)
-  const [tempData, setTempData] = useState([])
-  const [solarData, setSolarData] = useState([])
-  const [agriData, setAgriData] = useState(null)
 
-  // Fetch weather
+  // Fetch weather for AgriBlock sidebar
   useEffect(() => {
     getWeather()
       .then(res => {
@@ -18,60 +17,12 @@ export default function UnifiedDashboard({ mode = 'greenblock' }) {
       .catch(() => {})
   }, [])
 
-  // Fetch AgriBlock data
-  useEffect(() => {
-    Promise.all([
-      getAgriRecommendation().catch(() => null),
-      getAgriIrrigationStatus().catch(() => null),
-      getAgriDiseaseRisk().catch(() => null),
-      getAgriTankLevel().catch(() => null),
-      getSensors().catch(() => null),
-    ]).then(([rec, irr, dis, tank, sens]) => {
-      setAgriData({ recommendation: rec?.data?.data, irrigation: irr?.data?.data, disease: dis?.data?.data, tank: tank?.data?.data, sensors: sens?.data?.data })
-    })
-  }, [])
-
-  // Initialize chart data
-  useEffect(() => {
-    if (tempData.length === 0) {
-      const t = Array.from({ length: 120 }, (_, i) => 25.8 + Math.sin(i * 0.1) * 0.5 - i * 0.005)
-      const s = Array.from({ length: 120 }, (_, i) => 155 + Math.sin((i / 120) * Math.PI) * 48)
-      setTempData(t)
-      setSolarData(s)
-    }
-  }, [])
-
-  // Live ticker
-  useEffect(() => {
-    const iv = setInterval(() => setTick(t => t + 1), 2000)
-    return () => clearInterval(iv)
-  }, [])
-
-  const generateTempChart = () => {
-    if (tempData.length === 0) return ''
-    const W = 1200, H = 200, padL = 36, padR = 20, padT = 14, padB = 28
-    const cW = W - padL - padR, cH = H - padT - padB
-    const mn = Math.min(...tempData), mx = Math.max(...tempData)
-    const lo = mn - 0.4, hi = mx + 0.4
-    const xStep = cW / (tempData.length - 1)
-    const toY = v => padT + cH - ((v - lo) / (hi - lo)) * cH
-    const toX = i => padL + i * xStep
-    const points = tempData.map((v, i) => `${toX(i)},${toY(v)}`).join(' ')
-    return (
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ height: '200px' }}>
-        <defs>
-          <linearGradient id="fill-temp" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        <polyline points={points} fill="none" stroke="#22d3ee" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
-        <circle cx={toX(tempData.length - 1)} cy={toY(tempData[tempData.length - 1])} r="4" fill="#22d3ee" stroke="#0f1a0f" strokeWidth="2" />
-      </svg>
-    )
-  }
-
   const switchTab = (t) => setTab(t)
+
+  const MAIN_TABS = [
+    { id: 'green', label: 'GreenBlock', subtitle: 'Energy & Environment' },
+    { id: 'agri', label: 'AgriBlock', subtitle: 'Control Center' }
+  ]
 
   return (
     <div style={{
@@ -112,142 +63,29 @@ export default function UnifiedDashboard({ mode = 'greenblock' }) {
         </div>
       </nav>
 
-      {/* TABS */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #1e2e1e', padding: '0 24px', background: '#090e09' }}>
-        {['green', 'agri'].map(t => (
-          <button
-            key={t}
-            onClick={() => switchTab(t)}
-            style={{
-              padding: '10px 20px', fontFamily: 'monospace', fontSize: '10px', fontWeight: 600,
-              letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: 'none',
-              color: tab === t ? (t === 'green' ? '#4ade80' : '#22d3ee') : '#6b7e6b',
-              cursor: 'pointer', borderBottom: tab === t ? `2px solid ${t === 'green' ? '#4ade80' : '#22d3ee'}` : '2px solid transparent',
-              marginBottom: '-1px', transition: 'color 0.2s, border-color 0.2s'
-            }}
-          >
-            {t === 'green' ? 'GreenBlock' : 'AgriBlock'}
-          </button>
-        ))}
-      </div>
+      {/* MAIN TABS */}
+      <TabNavigation
+        tabs={MAIN_TABS}
+        activeTab={tab}
+        onTabChange={switchTab}
+      />
 
-      {/* PAGE: GREEN */}
+      {/* PAGE: GREEN BLOCK */}
       {tab === 'green' && (
-        <div style={{ padding: '0 24px 24px' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 600, letterSpacing: '0.2em', color: '#6b7e6b', textTransform: 'uppercase', padding: '14px 0 6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Sensor Summary — Live Readings
-            <div style={{ flex: 1, height: '1px', background: '#1e2e1e' }} />
-          </div>
-
-          {/* 4 stat cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
-            {[
-              { label: 'Temperature', value: '24.5 °C', color: '#22d3ee', trend: '▲ 0.3 since last hour' },
-              { label: 'Humidity', value: '62 %', color: '#4ade80', trend: 'Moderate — comfortable' },
-              { label: 'Solar Voltage', value: '4.2 V', color: '#f59e0b', trend: 'Stable output' },
-              { label: 'Solar Power', value: '180 mW', color: '#f59e0b', trend: '▶ Peak window active' },
-            ].map((card, i) => (
-              <div key={i} style={{
-                background: '#111c11', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '18px',
-                position: 'relative', overflow: 'hidden',
-                borderTop: `2px solid ${card.color}`
-              }}>
-                <div style={{ fontFamily: 'monospace', fontSize: '8.5px', fontWeight: 600, letterSpacing: '0.2em', color: '#6b7e6b', textTransform: 'uppercase', marginBottom: '6px' }}>{card.label}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '36px', fontWeight: 700, lineHeight: 1, letterSpacing: '-0.02em', margin: '4px 0 6px', color: card.color }}>{card.value}</div>
-                <div style={{ fontSize: '10px', color: '#6b7e6b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: card.color, flexShrink: 0 }} /> {card.trend}
-                </div>
-                <div style={{ marginTop: '14px', height: '3px', background: '#1a2e1a', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', background: `linear-gradient(90deg, ${card.color}44, ${card.color})`, width: '60%', borderRadius: '2px' }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Charts */}
-          <div style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 600, letterSpacing: '0.2em', color: '#6b7e6b', textTransform: 'uppercase', padding: '14px 0 6px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Sensor History — Last 2 Hours
-            <div style={{ flex: 1, height: '1px', background: '#1e2e1e' }} />
-          </div>
-          <div style={{ background: '#111c11', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '16px 18px 10px', marginBottom: '12px', borderTop: '2px solid #22d3ee' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: '9px', fontWeight: 600, letterSpacing: '0.18em', color: '#94a394', textTransform: 'uppercase', marginBottom: '12px' }}>
-              Temperature <span style={{ color: '#6b7e6b', fontWeight: 400 }}>— Last 2 Hours</span>
-            </div>
-            <div style={{ height: '200px' }}>
-              {generateTempChart()}
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center', padding: '12px', fontFamily: 'monospace', fontSize: '9px', color: '#6b7e6b', letterSpacing: '0.1em', borderTop: '1px solid #1e2e1e' }}>
-            Source: Demo mode — Connect hardware for live sensor data
-          </div>
+        <div style={{ padding: '24px' }}>
+          <GreenBlockDashboard />
         </div>
       )}
 
-      {/* PAGE: AGRI with Desi Jugaad Toolkit */}
+      {/* PAGE: AGRI BLOCK */}
       {tab === 'agri' && (
-        <div style={{ padding: '0 24px 24px' }}>
-          {/* Desi Jugaad Toolkit Section */}
-          <div style={{ background: '#111c11', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '18px', marginBottom: '20px', borderTop: '2px solid #f59e0b' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#c8d8c8', marginBottom: '12px' }}>🔧 Desi Jugaad Toolkit</h2>
-            <p style={{ fontSize: '12px', color: '#94a394', marginBottom: '12px' }}>
-              Practical farming solutions using locally available materials. Step-by-step guidance powered by AI.
-            </p>
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '12px'
-            }}>
-              {[1, 2, 3].map(step => (
-                <div key={step} style={{
-                  background: step === 2 ? '#22d3ee22' : '#1a2e1a', border: `1px solid ${step === 2 ? '#22d3ee' : '#1e2e1e'}`,
-                  borderRadius: '6px', padding: '8px', textAlign: 'center',
-                  fontFamily: 'monospace', fontSize: '11px', fontWeight: 600,
-                  color: step === 2 ? '#22d3ee' : '#94a394'
-                }}>
-                  Step {step} {step === 2 ? '• Active' : step === 1 ? '• Done' : ''}
-                </div>
-              ))}
-            </div>
-            <div style={{ background: '#0a150a', border: '1px solid #22d3ee', borderRadius: '6px', padding: '12px', marginBottom: '12px' }}>
-              <h3 style={{ fontSize: '12px', fontWeight: 600, color: '#22d3ee', marginBottom: '8px' }}>Step 1: Goal Selection</h3>
-              <label style={{ display: 'block', fontSize: '11px', color: '#94a394', marginBottom: '6px' }}>Kya banana chahte hain?</label>
-              <select style={{
-                width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #1e2e1e',
-                background: '#0f1a0f', color: '#c8d8c8', fontSize: '11px', fontFamily: 'monospace'
-              }}>
-                <option>Compost Bin</option>
-                <option>Drip Irrigation</option>
-                <option>Pesticide Spray</option>
-                <option>Plant Support</option>
-              </select>
-              <button style={{
-                marginTop: '8px', width: '100%', padding: '8px', borderRadius: '4px',
-                background: '#22d3ee', color: '#0a0f0a', fontWeight: 600, fontSize: '11px', border: 'none', cursor: 'pointer'
-              }}>
-                AI se Materials Puchho 🤖
-              </button>
-            </div>
-            <div style={{ background: '#0a150a', border: '1px solid #22d3ee', borderRadius: '6px', padding: '12px' }}>
-              <h3 style={{ fontSize: '12px', fontWeight: 600, color: '#22d3ee', marginBottom: '8px' }}>Step 3: Final Jugaad Recipe</h3>
-              <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#c8d8c8', lineHeight: '1.6' }}>
-                <strong>Compost Bin — Jugaad Style</strong>
-                <div style={{ marginTop: '8px', color: '#94a394' }}>
-                  Materials: Old drum, burlap sack, bamboo sticks<br />
-                  Layer 1: Dry leaves (12 inches)<br />
-                  Layer 2: Cow dung (6 inches)<br />
-                  Layer 3: Kitchen waste (6 inches)<br />
-                  Repeat layers. Mist with water daily.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Weather Card */}
-          {weather && (
-            <div style={{ background: '#111c11', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '18px', marginBottom: '20px', borderTop: '2px solid #22d3ee' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#c8d8c8', marginBottom: '12px' }}>🌤️ Outdoor Weather — Jaipur</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                <div style={{ background: '#0a150a', padding: '12px', borderRadius: '4px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '10px', color: '#6b7e6b', marginBottom: '6px' }}>Temperature</p>
+        <div style={{ padding: '24px' }}>
+          <AgriBlockDashboard />
+        </div>
+      )}
+    </div>
+  )
+}
                   <p style={{ fontSize: '24px', fontWeight: 700, color: '#f59e0b' }}>{weather.outdoor_temp || 28}°C</p>
                 </div>
                 <div style={{ background: '#0a150a', padding: '12px', borderRadius: '4px', textAlign: 'center' }}>
