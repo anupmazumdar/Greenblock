@@ -2,3 +2,12 @@ venv/
 __pycache__/
 *.pyc
 greenblock-frontend/node_modules/
+greenblock-frontend/dist/
+greenblock-blockchain/node_modules/
+greenblock-blockchain/artifacts/
+greenblock-blockchain/cache/
+greenblock-blockchain/.env
+greenblock-backend/.env
+greenblock-frontend/.env
+.claude/
+notebooks/

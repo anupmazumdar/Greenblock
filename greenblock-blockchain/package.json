@@ -1,0 +1,21 @@
+{
+  "name": "greenblock-blockchain",
+  "version": "1.0.0",
+  "description": "GreenBlock smart contracts for carbon credit tokenization on Polygon",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:mumbai": "hardhat run scripts/deploy.js --network polygonMumbai",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "node": "hardhat node",
+    "export-abi": "node scripts/exportAbi.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  }
+}

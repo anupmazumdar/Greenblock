@@ -16,6 +16,7 @@ from routes import (
     digest,
     score,
     health,
+    blockchain,
 )
 
 load_dotenv()
@@ -62,6 +63,7 @@ app.include_router(alerts.router, prefix="/api", tags=["Alerts"])
 app.include_router(digest.router, prefix="/api", tags=["Alerts"])
 app.include_router(score.router, prefix="/api", tags=["Energy"])
 app.include_router(health.router, prefix="/api", tags=["Health"])
+app.include_router(blockchain.router, prefix="/api", tags=["Blockchain"])
 
 
 @app.get("/")

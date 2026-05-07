@@ -254,4 +254,11 @@ export const sendWhatsappAlert = (payload) => requestWithFailover({ method: 'pos
 export const sendTelegramAlert = (payload) => requestWithFailover({ method: 'post', url: '/alerts/telegram', data: payload })
 export const getMorningDigest = () => requestWithFailover({ method: 'get', url: '/alerts/digest' })
 
+// ─── Blockchain / Carbon Credits ────────────────────────────────────────────
+export const getBlockchainStatus = () => requestWithFailover({ method: 'get', url: '/blockchain/status' })
+export const getMarketStats = () => requestWithFailover({ method: 'get', url: '/blockchain/market-stats' })
+export const getMrvReport = () => requestWithFailover({ method: 'get', url: '/blockchain/mrv-report' })
+export const estimateCredits = (data) => requestWithFailover({ method: 'post', url: '/blockchain/estimate', data })
+export const signCreditClaim = (data) => requestWithFailover({ method: 'post', url: '/blockchain/sign-claim', data })
+
 export default api

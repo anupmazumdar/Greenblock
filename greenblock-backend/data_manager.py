@@ -3,6 +3,7 @@ Hybrid data manager: Live sensors + Kaggle fallback + SQLite persistence.
 Provides resilient data access with automatic fallback to baseline when sensors unavailable.
 """
 
+import os
 import sqlite3
 import json
 import random
@@ -10,8 +11,9 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 
-# Database path
-DB_PATH = Path(__file__).parent / "greenblock_analytics.db"
+# On Vercel the filesystem is read-only except /tmp — detect and redirect there.
+_IS_VERCEL = os.environ.get("VERCEL") == "1"
+DB_PATH = Path("/tmp/greenblock_analytics.db") if _IS_VERCEL else Path(__file__).parent / "greenblock_analytics.db"
 
 # Kaggle baseline datasets (simulated; in production replace with actual CSV loads)
 KAGGLE_SOIL_BASELINE = [
