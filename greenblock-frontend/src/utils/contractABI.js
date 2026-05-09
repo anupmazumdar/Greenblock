@@ -30,6 +30,18 @@ function getAddresses() {
 
 export const CONTRACT_ADDRESSES = getAddresses()
 
+export const ALGORAND_APP_IDS = {
+  creditRegistry:  Number(import.meta.env.VITE_ALGORAND_CREDIT_REGISTRY_APP_ID) || 0,
+  marketplace:     Number(import.meta.env.VITE_ALGORAND_MARKETPLACE_APP_ID)     || 0,
+  retirementLedger: Number(import.meta.env.VITE_ALGORAND_RETIREMENT_LEDGER_APP_ID) || 0,
+  gbtAssetId:      Number(import.meta.env.VITE_ALGORAND_GBT_ASSET_ID)           || 0,
+}
+
+export const SOLANA_PROGRAM_IDS = {
+  creditRegistry: import.meta.env.VITE_SOLANA_CREDIT_REGISTRY_PROGRAM_ID || '',
+  gbtMint:        import.meta.env.VITE_SOLANA_GBT_MINT                   || '',
+}
+
 export const SUPPORTED_CHAIN_IDS = {
   80002: 'Polygon Amoy Testnet',
   137: 'Polygon Mainnet',

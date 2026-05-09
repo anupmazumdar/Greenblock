@@ -153,16 +153,20 @@ def get_sensor_history():
 
 
 @router.post("/sensors/ingest")
-def ingest_sensor_data(payload: IngestPayload):
-    """Arduino serial bridge will POST real data here."""
+async def ingest_sensor_data(payload: IngestPayload):
+    """Arduino / RPi serial bridge POSTs real sensor data here."""
     record = {
         "timestamp": datetime.utcnow().isoformat(),
         **payload.dict(),
         "source": "arduino"
     }
     _history.append(record)
-    # Persist to SQLite for historical queries
     _dm.store_sensor_reading(record)
+
+    # Push to all WebSocket clients immediately
+    from routes.realtime import broadcast
+    await broadcast(record)
+
     return {"status": "ok", "recorded": record}
 
 
