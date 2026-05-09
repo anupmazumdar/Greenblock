@@ -8,8 +8,9 @@ export default function SubTabNavigation({ tabs, activeTab, onTabChange }) {
       display: 'flex',
       gap: '8px',
       padding: '12px 0',
-      borderBottom: '1px solid #1e2e1e',
-      marginBottom: '16px'
+      borderBottom: '1px solid var(--wire)',
+      marginBottom: '16px',
+      overflowX: 'auto',
     }}>
       {tabs.map((tab) => (
         <button
@@ -17,17 +18,18 @@ export default function SubTabNavigation({ tabs, activeTab, onTabChange }) {
           onClick={() => onTabChange(tab.id)}
           style={{
             padding: '6px 14px',
-            fontFamily: 'monospace',
+            fontFamily: 'var(--font-mono, monospace)',
             fontSize: '9px',
             fontWeight: 600,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            background: activeTab === tab.id ? `${tab.activeColor || '#4ade80'}22` : 'transparent',
-            border: `1px solid ${activeTab === tab.id ? tab.activeColor || '#4ade80' : '#1e2e1e'}`,
-            color: activeTab === tab.id ? tab.activeColor || '#4ade80' : '#6b7e6b',
+            background: activeTab === tab.id ? `${tab.activeColor || 'var(--phosphor)'}22` : 'transparent',
+            border: `1px solid ${activeTab === tab.id ? tab.activeColor || 'var(--phosphor)' : 'var(--wire)'}`,
+            color: activeTab === tab.id ? tab.activeColor || 'var(--phosphor)' : 'var(--text-dim)',
             cursor: 'pointer',
             borderRadius: '4px',
             transition: 'all 0.2s',
+            flexShrink: 0,
           }}
         >
           {tab.label}

@@ -18,39 +18,41 @@ const POLYGON_PANELS = [
 const S = {
   panelBtn: (active, color) => ({
     background: active ? `${color}18` : 'transparent',
-    border: `1px solid ${active ? color : '#1e2e1e'}`,
-    color: active ? color : '#6b7e6b',
+    border: `1px solid ${active ? color : 'var(--wire, rgba(0,255,140,0.1))'}`,
+    color: active ? color : 'var(--text-dim, rgba(220,242,225,0.38))',
     borderRadius: '6px', padding: '8px 16px', fontSize: '11px',
-    letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'monospace',
+    letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'var(--font-mono, monospace)',
     textTransform: 'uppercase', display: 'flex', alignItems: 'center',
     gap: '6px', transition: 'all 0.15s ease',
   }),
   badge: (color) => ({
     background: `${color}18`, border: `1px solid ${color}44`, color,
     borderRadius: '4px', padding: '2px 8px', fontSize: '10px',
-    letterSpacing: '0.1em', fontFamily: 'monospace', display: 'inline-block',
+    letterSpacing: '0.1em', fontFamily: 'var(--font-mono, monospace)', display: 'inline-block',
   }),
   card: {
-    background: '#0a0f0a', border: '1px solid #1e2e1e', borderRadius: '10px', padding: '20px',
+    background: 'var(--deep, #050D07)', border: '1px solid var(--wire, rgba(0,255,140,0.1))',
+    borderRadius: '10px', padding: '20px',
   },
   row: { display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' },
   connectBtn: (color) => ({
     background: `${color}18`, border: `1px solid ${color}44`, color,
     borderRadius: '6px', padding: '10px 20px', fontSize: '12px',
-    fontFamily: 'monospace', cursor: 'pointer', letterSpacing: '0.08em',
+    fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', letterSpacing: '0.08em',
     fontWeight: 700, transition: 'all 0.15s ease',
   }),
   input: {
-    background: '#0f1a0f', border: '1px solid #1e2e1e', color: '#c8d8c8',
-    borderRadius: '6px', padding: '8px 12px', fontFamily: 'monospace',
+    background: 'var(--surface, #091509)', border: '1px solid var(--wire, rgba(0,255,140,0.1))',
+    color: 'var(--text-mid, rgba(220,242,225,0.65))',
+    borderRadius: '6px', padding: '8px 12px', fontFamily: 'var(--font-mono, monospace)',
     fontSize: '12px', width: '160px', outline: 'none',
   },
   error: {
     background: '#1a0a0a', border: '1px solid #f9731644', borderRadius: '8px',
-    padding: '10px 16px', color: '#f97316', fontFamily: 'monospace', fontSize: '11px',
+    padding: '10px 16px', color: '#f97316', fontFamily: 'var(--font-mono, monospace)', fontSize: '11px',
     marginBottom: '12px',
   },
-  stat: { background: '#0a0f0a', padding: '12px 16px' },
+  stat: { background: 'var(--deep, #050D07)', padding: '12px 16px' },
 }
 
 function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel, setupCmds }) {
@@ -72,25 +74,43 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
   if (!hook.account) {
     return (
       <div style={S.card}>
-        <div style={{ fontSize: '11px', color: '#6b7e6b', marginBottom: '16px', lineHeight: '1.6' }}>
-          Connect your wallet to claim carbon credits on this chain.
-        </div>
-        {hook.error && <div style={S.error}>{hook.error}</div>}
-        <button
-          style={S.connectBtn(color)}
-          onClick={hook.connect}
-          disabled={hook.connecting}
-        >
-          {hook.connecting ? 'Connecting…' : connectLabel}
-        </button>
-        {!hook.contractsDeployed && (
+        {hook.connecting ? (
+          <div style={{ textAlign: 'center', padding: '12px 0 20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '12px' }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{
+                  width: '7px', height: '7px', borderRadius: '50%',
+                  background: color,
+                  animation: `pulse-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                }} />
+              ))}
+            </div>
+            <div style={{ color, fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700 }}>
+              Connecting…
+            </div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginTop: '4px' }}>
+              Approve the connection in your wallet.
+            </div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '16px', lineHeight: '1.6' }}>
+              Connect your wallet to claim carbon credits on this chain.
+            </div>
+            {hook.error && <div style={S.error}>{hook.error}</div>}
+            <button style={S.connectBtn(color)} onClick={hook.connect}>
+              {connectLabel}
+            </button>
+          </>
+        )}
+        {!hook.connecting && !hook.contractsDeployed && (
           <div style={{ marginTop: '20px' }}>
-            <div style={{ fontSize: '10px', color: '#f59e0b', fontFamily: 'monospace', fontWeight: 700, marginBottom: '8px' }}>
+            <div style={{ fontSize: '10px', color: '#f59e0b', fontFamily: 'var(--font-mono)', fontWeight: 700, marginBottom: '8px' }}>
               SETUP: Deploy Contracts First
             </div>
-            <div style={{ fontSize: '11px', color: '#6b7e6b', lineHeight: '2', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: '2', fontFamily: 'var(--font-mono)' }}>
               {setupCmds.map((cmd, i) => (
-                <div key={i} style={{ color: cmd.startsWith('#') ? '#4a5e4a' : '#c8d8c8' }}>
+                <div key={i} style={{ color: cmd.startsWith('#') ? 'var(--text-dim)' : 'var(--text-mid)' }}>
                   {cmd.startsWith('#') ? '' : '$ '}{cmd}
                 </div>
               ))}
@@ -106,7 +126,7 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
       {hook.error && <div style={S.error}>{hook.error}</div>}
 
       {/* Balances */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1px', background: '#1e2e1e', borderRadius: '8px', overflow: 'hidden', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1px', background: 'var(--wire)', borderRadius: '8px', overflow: 'hidden', marginBottom: '20px' }}>
         {[
           { label: symbol2Label, value: hook.algoBalance ?? hook.solBalance ?? '—', sub: symbol2 },
           { label: 'GBT Balance', value: hook.gbtBalance ?? '—', sub: '1 GBT = 1 kg CO₂' },
@@ -114,16 +134,16 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
           { label: 'Contracts', value: hook.contractsDeployed ? 'LIVE' : 'DEMO', sub: hook.contractsDeployed ? 'Deployed' : 'Set env vars' },
         ].map(({ label, value, sub }) => (
           <div key={label} style={S.stat}>
-            <div style={{ fontSize: '10px', color: '#6b7e6b', letterSpacing: '0.1em' }}>{label}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '13px', color: '#c8d8c8', fontWeight: 700, marginTop: '2px' }}>{value}</div>
-            <div style={{ fontSize: '10px', color: '#4a5e4a', marginTop: '2px' }}>{sub}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', letterSpacing: '0.1em' }}>{label}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-mid)', fontWeight: 700, marginTop: '2px' }}>{value}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>{sub}</div>
           </div>
         ))}
       </div>
 
       {/* Claim Credits */}
       <div>
-        <div style={{ fontSize: '10px', color: '#6b7e6b', letterSpacing: '0.1em', marginBottom: '10px' }}>
+        <div style={{ fontSize: '10px', color: 'var(--text-dim)', letterSpacing: '0.1em', marginBottom: '10px' }}>
           CLAIM CREDITS (oracle-signed)
         </div>
         <div style={S.row}>
@@ -139,7 +159,7 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
           >
             {hook.txPending ? 'Sending…' : 'Claim GBT'}
           </button>
-          <button style={{ ...S.connectBtn('#6b7e6b'), fontSize: '10px' }} onClick={hook.disconnect}>
+          <button style={{ ...S.connectBtn('var(--text-dim)'), fontSize: '10px' }} onClick={hook.disconnect}>
             Disconnect
           </button>
         </div>
@@ -147,10 +167,10 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
         {txResult && (
           <div style={{
             marginTop: '12px', padding: '10px 14px', borderRadius: '6px',
-            background: txResult.ok ? '#0a1a0a' : '#1a0a0a',
-            border: `1px solid ${txResult.ok ? '#4ade8044' : '#f9731644'}`,
-            fontFamily: 'monospace', fontSize: '11px',
-            color: txResult.ok ? '#4ade80' : '#f97316',
+            background: txResult.ok ? 'var(--surface)' : '#1a0a0a',
+            border: `1px solid ${txResult.ok ? 'var(--wire-mid)' : '#f9731644'}`,
+            fontFamily: 'var(--font-mono)', fontSize: '11px',
+            color: txResult.ok ? 'var(--phosphor)' : '#f97316',
           }}>
             {txResult.ok
               ? `✓ Tx: ${txResult.txId.slice(0, 20)}…`
@@ -168,17 +188,17 @@ function SensorStrip({ sensors }) {
   const d = sensors.sensorData
   return (
     <div style={{
-      background: '#050f05', border: '1px solid #1e2e1e', borderRadius: '8px',
+      background: 'var(--void)', border: '1px solid var(--wire)', borderRadius: '8px',
       padding: '10px 16px', marginTop: '16px',
       display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <div style={{
           width: '6px', height: '6px', borderRadius: '50%',
-          background: sensors.connected ? '#4ade80' : '#f97316',
-          boxShadow: sensors.connected ? '0 0 6px #4ade80' : 'none',
+          background: sensors.connected ? 'var(--phosphor)' : '#f97316',
+          boxShadow: sensors.connected ? '0 0 6px var(--phosphor)' : 'none',
         }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '10px', color: sensors.connected ? '#4ade80' : '#f97316' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: sensors.connected ? 'var(--phosphor)' : '#f97316' }}>
           {sensors.connected ? 'RPi4 LIVE' : 'RPi4 OFFLINE'}
         </span>
       </div>
@@ -190,14 +210,14 @@ function SensorStrip({ sensors }) {
         d.co2    != null && { label: 'CO₂', value: `${d.co2} ppm` },
         d.kwh_saved != null && { label: 'kWh saved', value: d.kwh_saved.toFixed(3) },
       ].filter(Boolean).map(({ label, value }) => (
-        <div key={label} style={{ fontFamily: 'monospace', fontSize: '10px' }}>
-          <span style={{ color: '#4a5e4a' }}>{label} </span>
-          <span style={{ color: '#c8d8c8', fontWeight: 700 }}>{value}</span>
+        <div key={label} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
+          <span style={{ color: 'var(--text-dim)' }}>{label} </span>
+          <span style={{ color: 'var(--text-mid)', fontWeight: 700 }}>{value}</span>
         </div>
       ))}
 
       {sensors.lastUpdated && (
-        <div style={{ marginLeft: 'auto', fontSize: '9px', color: '#4a5e4a', fontFamily: 'monospace' }}>
+        <div style={{ marginLeft: 'auto', fontSize: '9px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
           {sensors.lastUpdated.toLocaleTimeString()}
         </div>
       )}
@@ -227,7 +247,7 @@ export default function BlockchainSection() {
     <div>
       {/* Section Header */}
       <div style={{
-        background: '#0a0f0a', border: '1px solid #1e2e1e', borderRadius: '10px',
+        background: 'var(--deep)', border: '1px solid var(--wire)', borderRadius: '10px',
         padding: '20px 24px', marginBottom: '20px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
@@ -235,15 +255,15 @@ export default function BlockchainSection() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
               <div style={{
                 width: '28px', height: '28px', borderRadius: '6px',
-                background: 'linear-gradient(135deg, #4ade80, #9945ff)',
+                background: 'linear-gradient(135deg, var(--phosphor), #9945ff)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '14px', fontWeight: 700, color: '#050f05',
+                fontSize: '14px', fontWeight: 700, color: 'var(--void)',
               }}>⛓</div>
-              <div style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700, color: '#c8d8c8', letterSpacing: '0.08em' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 700, color: 'var(--text-mid)', letterSpacing: '0.08em' }}>
                 CARBON CREDIT BLOCKCHAIN
               </div>
             </div>
-            <div style={{ fontSize: '11px', color: '#6b7e6b', maxWidth: '600px', lineHeight: '1.6' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)', maxWidth: '600px', lineHeight: '1.6' }}>
               GBT (GreenBlock Token) — IoT-verified carbon credits on Polygon, Algorand, and Solana.
               Oracle-signed claims from RPi4 sensor data. Tradeable peer-to-peer. Retirable as certificates.
             </div>
@@ -252,14 +272,14 @@ export default function BlockchainSection() {
             <span style={S.badge('#a855f7')}>Polygon PoS</span>
             <span style={S.badge('#00b4d8')}>Algorand AVM</span>
             <span style={S.badge('#9945ff')}>Solana SVM</span>
-            <span style={S.badge('#4ade80')}>CCTS 2023</span>
+            <span style={S.badge('var(--phosphor)')}>CCTS 2023</span>
           </div>
         </div>
 
         {/* Stats strip */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: '1px', background: '#1e2e1e', borderRadius: '8px', overflow: 'hidden', marginTop: '16px',
+          gap: '1px', background: 'var(--wire)', borderRadius: '8px', overflow: 'hidden', marginTop: '16px',
         }}>
           {[
             { label: 'Token',           value: 'GBT',    sub: '1 GBT = 1 kg CO₂'   },
@@ -268,10 +288,10 @@ export default function BlockchainSection() {
             { label: 'Algorand',        value: 'ASA',    sub: '6 decimals (ARC-20)'  },
             { label: 'Solana',          value: 'SPL',    sub: '9 decimals'           },
           ].map(({ label, value, sub }) => (
-            <div key={label} style={{ background: '#0a0f0a', padding: '12px 16px' }}>
-              <div style={{ fontSize: '10px', color: '#6b7e6b', letterSpacing: '0.1em' }}>{label}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: '13px', color: '#c8d8c8', fontWeight: 700, marginTop: '2px' }}>{value}</div>
-              <div style={{ fontSize: '10px', color: '#4a5e4a', marginTop: '2px' }}>{sub}</div>
+            <div key={label} style={{ background: 'var(--deep)', padding: '12px 16px' }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-dim)', letterSpacing: '0.1em' }}>{label}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-mid)', fontWeight: 700, marginTop: '2px' }}>{value}</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>{sub}</div>
             </div>
           ))}
         </div>
@@ -291,12 +311,12 @@ export default function BlockchainSection() {
             ))}
             {web3.account && (
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 4px #4ade80' }} />
-                <span style={{ fontFamily: 'monospace', fontSize: '10px', color: '#4ade80' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--phosphor)', boxShadow: '0 0 4px var(--phosphor)' }} />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--phosphor)' }}>
                   {web3.account.slice(0, 6)}…{web3.account.slice(-4)}
                 </span>
                 {credits.gbtBalance !== null && (
-                  <span style={S.badge('#4ade80')}>{credits.gbtBalance} GBT</span>
+                  <span style={S.badge('var(--phosphor)')}>{credits.gbtBalance} GBT</span>
                 )}
               </div>
             )}
@@ -310,17 +330,17 @@ export default function BlockchainSection() {
           {panel === 'mrv'    && <MRVReport />}
 
           {!credits.contractsDeployed && (
-            <div style={{ background: '#0f1a0f', border: '1px solid #1e2e1e', borderRadius: '10px', padding: '20px', marginTop: '20px' }}>
-              <div style={{ fontSize: '11px', color: '#f59e0b', fontFamily: 'monospace', fontWeight: 700, marginBottom: '12px' }}>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--wire)', borderRadius: '10px', padding: '20px', marginTop: '20px' }}>
+              <div style={{ fontSize: '11px', color: '#f59e0b', fontFamily: 'var(--font-mono)', fontWeight: 700, marginBottom: '12px' }}>
                 SETUP: Deploy Smart Contracts
               </div>
-              <div style={{ fontSize: '11px', color: '#6b7e6b', lineHeight: '2', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-dim)', lineHeight: '2', fontFamily: 'var(--font-mono)' }}>
                 {['cd greenblock-blockchain', 'npm install', 'cp .env.example .env', 'npx hardhat compile',
                   'npx hardhat run scripts/deploy.js --network polygonAmoy',
                   '# Copy addresses to frontend .env:',
                   '# VITE_CONTRACT_GREEN_TOKEN=0x...', '# VITE_CONTRACT_CREDIT_REGISTRY=0x...',
                 ].map((cmd, i) => (
-                  <div key={i} style={{ color: cmd.startsWith('#') ? '#4a5e4a' : '#c8d8c8' }}>
+                  <div key={i} style={{ color: cmd.startsWith('#') ? 'var(--text-dim)' : 'var(--text-mid)' }}>
                     {cmd.startsWith('#') ? '' : '$ '}{cmd}
                   </div>
                 ))}
