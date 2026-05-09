@@ -55,7 +55,7 @@ const S = {
   stat: { background: 'var(--deep, #050D07)', padding: '12px 16px' },
 }
 
-function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel, setupCmds }) {
+function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel, setupCmds, installUrl, walletName }) {
   const [kwhInput, setKwhInput] = useState('')
   const [txResult, setTxResult] = useState(null)
 
@@ -72,6 +72,29 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
   }
 
   if (!hook.account) {
+    /* Wallet extension not installed (e.g. Phantom) */
+    if (hook.isPhantomAvailable === false) {
+      return (
+        <div style={{ ...S.card, textAlign: 'center', padding: '36px 24px' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" style={{ margin: '0 auto 12px' }} aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
+          </svg>
+          <div style={{ color, fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>
+            {walletName || 'Wallet'} Not Detected
+          </div>
+          <div style={{ color: 'var(--text-dim)', fontSize: '12px', maxWidth: '300px', margin: '0 auto 20px', lineHeight: '1.6' }}>
+            Install the {walletName} browser extension to connect and claim carbon credits on this chain.
+          </div>
+          {installUrl && (
+            <a href={installUrl} target="_blank" rel="noreferrer"
+              style={{ ...S.connectBtn(color), display: 'inline-block', textDecoration: 'none', fontSize: '11px', padding: '8px 18px' }}>
+              Install {walletName}
+            </a>
+          )}
+        </div>
+      )
+    }
+
     return (
       <div style={S.card}>
         {hook.connecting ? (
@@ -89,13 +112,17 @@ function ChainWallet({ hook, color, symbol, symbol2, symbol2Label, connectLabel,
               Connecting…
             </div>
             <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginTop: '4px' }}>
-              Approve the connection in your wallet.
+              {walletName === 'Phantom'
+                ? 'Approve the connection in your Phantom extension.'
+                : 'Scan the QR code with Pera Wallet on your phone.'}
             </div>
           </div>
         ) : (
           <>
             <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '16px', lineHeight: '1.6' }}>
-              Connect your wallet to claim carbon credits on this chain.
+              {connectLabel === 'Connect Pera Wallet'
+                ? 'Scan the QR code with Pera Wallet to connect your Algorand account.'
+                : 'Connect your wallet to claim IoT-verified carbon credits on this chain.'}
             </div>
             {hook.error && <div style={S.error}>{hook.error}</div>}
             <button style={S.connectBtn(color)} onClick={hook.connect}>
@@ -359,6 +386,7 @@ export default function BlockchainSection() {
           symbol2="ALGO"
           symbol2Label="ALGO Balance"
           connectLabel="Connect Pera Wallet"
+          walletName="Pera Wallet"
           setupCmds={[
             'cd greenblock-blockchain/algorand',
             'pip install -r requirements.txt',
@@ -380,6 +408,8 @@ export default function BlockchainSection() {
           symbol2="SOL"
           symbol2Label="SOL Balance"
           connectLabel="Connect Phantom"
+          walletName="Phantom"
+          installUrl="https://phantom.app"
           setupCmds={[
             'cd greenblock-blockchain/solana',
             'anchor build',
