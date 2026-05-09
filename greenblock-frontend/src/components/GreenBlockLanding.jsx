@@ -2,15 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── STATIC DATA ───
 
-const tickerItems = [
-  'Blockchain-Verified Carbon Credits',
-  'IoT-Powered Real-Time Monitoring',
-  'Hyperledger Sawtooth Infrastructure',
-  'Smart Contract Incentives',
-  'Transparent Carbon Offset Marketplace',
-  'Government × Corporate × Citizen Ecosystem',
-]
-
 const stats = [
   { value: '23+', label: 'Green Blockchain Networks' },
   { value: '100%', label: 'Immutable Records' },
@@ -64,12 +55,6 @@ const techTags = [
 ]
 
 // ─── AGRIBLOCK VARIANTS ───
-
-const agriTickerItems = [
-  'IoT-Powered Soil Monitoring', 'Farm-to-Fork Traceability Ledger',
-  'Smart Irrigation Optimization', 'Climate-Resilient Crop Insights',
-  'Transparent Produce Marketplace', 'Farmer × Buyer × Regulator Collaboration',
-]
 
 const agriStats = [
   { value: '120+', label: 'Pilot Farms Instrumented' },
@@ -225,118 +210,47 @@ function TerminalFeed({ messages, isAgriMode, prefersReducedMotion }) {
   )
 }
 
-// ─── BLOCKCHAIN VISUAL ───
-
-function BlockchainVisual({ isAgriMode, prefersReducedMotion }) {
-  const records = isAgriMode
-    ? ['FARM BASELINE RECORDED', 'SOIL: MOISTURE +18%', 'ADVISORY: IRRIGATE -12%', 'BATCH → BUYER: VERIFIED']
-    : ['GOV BASELINE SET', 'IOT READING: -14% CO₂', 'CREDITS AWARDED: +250 CC', 'CREDIT TRADE: CORP → GOV']
-
-  const hashes = ['8f4a2c', '2e9d1f', '7a3b8e', 'f1c4a9']
-
-  return (
-    <svg viewBox="0 0 400 560" xmlns="http://www.w3.org/2000/svg" fill="none" className="blockchain-svg">
-      <defs>
-        <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#112414" />
-          <stop offset="100%" stopColor="#0A1C0D" />
-        </linearGradient>
-      </defs>
-
-      {records.map((rec, i) => {
-        const y = 20 + i * 135
-        const isActive = i === 2
-        const colors = ['rgba(0,255,140,0.8)', 'rgba(0,255,140,0.55)', 'var(--phosphor,#00FF8C)', 'rgba(82,183,136,0.6)']
-        const color = colors[i]
-        return (
-          <g key={rec}>
-            <rect x="30" y={y} width="340" height="95"
-              fill="url(#bGrad)"
-              stroke={isActive ? 'rgba(0,255,140,0.6)' : 'rgba(0,255,140,0.15)'}
-              strokeWidth={isActive ? 1.5 : 1}
-              rx="3"
-            />
-            <rect x="30" y={y} width="340" height="2.5" fill={color} rx="3" />
-            <text x="50" y={y + 26} fontFamily="JetBrains Mono, monospace" fontSize="8" fill={color} opacity="0.7" letterSpacing="0.12em">
-              BLOCK #{String(421 + i).padStart(5, '0')}
-            </text>
-            <text x="50" y={y + 48} fontFamily="JetBrains Mono, monospace" fontSize="9.5" fill={isActive ? '#00FF8C' : '#d8f3dc'}>
-              {rec}
-            </text>
-            <text x="50" y={y + 66} fontFamily="JetBrains Mono, monospace" fontSize="7" fill="rgba(0,255,140,0.35)">
-              HASH: 0x{hashes[i]}...
-            </text>
-            <circle cx="350" cy={y + 47} r="9"
-              fill={isActive ? 'rgba(0,255,140,0.18)' : 'rgba(0,255,140,0.05)'}
-              stroke={color}
-              strokeWidth="1"
-            />
-            <text x="346" y={y + 51} fontFamily="JetBrains Mono, monospace" fontSize="9" fill={color}>
-              {i === 3 ? '⋯' : '✓'}
-            </text>
-            {isActive && !prefersReducedMotion && (
-              <rect x="30" y={y} width="340" height="95" fill="none" stroke="rgba(0,255,140,0.4)" strokeWidth="0.5" rx="3">
-                <animate attributeName="opacity" values="0.1;0.6;0.1" dur="2.5s" repeatCount="indefinite" />
-              </rect>
-            )}
-            {i < 3 && (
-              <>
-                <line x1="200" y1={y + 95} x2="200" y2={y + 130}
-                  stroke="rgba(0,255,140,0.4)" strokeWidth="1.5" strokeDasharray="4,3" />
-                <polygon points={`196,${y + 127} 204,${y + 127} 200,${y + 135}`}
-                  fill="rgba(0,255,140,0.4)" />
-              </>
-            )}
-          </g>
-        )
-      })}
-    </svg>
-  )
-}
-
-// ─── LOGO ───
+// ─── ICONS ───
 
 function LogoHex() {
   return (
     <svg className="logo-hex" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <polygon points="18,2 32,10 32,26 18,34 4,26 4,10" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--phosphor)' }} />
-      <polygon points="18,8 27,13 27,23 18,28 9,23 9,13" fill="rgba(0,255,140,0.1)" />
+      <polygon points="18,8 27,13 27,23 18,28 9,23 9,13" fill="rgba(0,255,140,0.08)" />
       <circle cx="18" cy="18" r="4" fill="var(--phosphor, #00FF8C)" />
-      <line x1="18" y1="8" x2="18" y2="14" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
-      <line x1="27" y1="13" x2="22" y2="15.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
-      <line x1="27" y1="23" x2="22" y2="20.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
-      <line x1="18" y1="28" x2="18" y2="22" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
-      <line x1="9" y1="23" x2="14" y2="20.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
-      <line x1="9" y1="13" x2="14" y2="15.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.5" />
+      <line x1="18" y1="8" x2="18" y2="14" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
+      <line x1="27" y1="13" x2="22" y2="15.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
+      <line x1="27" y1="23" x2="22" y2="20.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
+      <line x1="18" y1="28" x2="18" y2="22" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
+      <line x1="9" y1="23" x2="14" y2="20.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
+      <line x1="9" y1="13" x2="14" y2="15.5" stroke="var(--phosphor, #00FF8C)" strokeWidth="1" opacity="0.45" />
     </svg>
   )
 }
 
 function DocIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
       <polyline points="14 2 14 8 20 8" />
     </svg>
   )
 }
 
-// ─── STEP ICONS ───
-
 function renderStepIcon(icon) {
   const ph = 'var(--phosphor, #00FF8C)'
-  const phDim = 'rgba(0,255,140,0.45)'
-  const phGhost = 'rgba(0,255,140,0.07)'
+  const phDim = 'rgba(0,255,140,0.4)'
+  const phGhost = 'rgba(0,255,140,0.06)'
 
   switch (icon) {
     case 'governance':
       return (
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="none" stroke={ph} strokeWidth="1.5" />
-          <line x1="24" y1="4" x2="24" y2="44" stroke={ph} strokeWidth="0.75" opacity="0.3" strokeDasharray="3,3" />
-          <line x1="6" y1="14" x2="42" y2="34" stroke={ph} strokeWidth="0.75" opacity="0.3" strokeDasharray="3,3" />
-          <line x1="42" y1="14" x2="6" y2="34" stroke={ph} strokeWidth="0.75" opacity="0.3" strokeDasharray="3,3" />
-          <circle cx="24" cy="24" r="5" fill={ph} opacity="0.9" />
+          <line x1="24" y1="4" x2="24" y2="44" stroke={ph} strokeWidth="0.75" opacity="0.25" strokeDasharray="3,3" />
+          <line x1="6" y1="14" x2="42" y2="34" stroke={ph} strokeWidth="0.75" opacity="0.25" strokeDasharray="3,3" />
+          <line x1="42" y1="14" x2="6" y2="34" stroke={ph} strokeWidth="0.75" opacity="0.25" strokeDasharray="3,3" />
+          <circle cx="24" cy="24" r="5" fill={ph} opacity="0.85" />
         </svg>
       )
     case 'sensing':
@@ -371,19 +285,17 @@ function renderStepIcon(icon) {
   }
 }
 
-// ─── FEATURE ICONS ───
-
 function renderFeatureIcon(icon) {
   const ph = 'var(--phosphor, #00FF8C)'
   switch (icon) {
     case 'shield':
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+      return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
     case 'signal':
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg>
+      return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg>
     case 'screen':
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+      return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
     default:
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+      return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ph} strokeWidth="1.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
   }
 }
 
@@ -417,7 +329,6 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
   const isAgri = variant === 'agriblock'
   const nextMode = isAgri ? 'greenblock' : 'agriblock'
 
-  const tick = isAgri ? agriTickerItems : tickerItems
   const statsFeed = isAgri ? agriStats : stats
   const stepsFeed = isAgri ? agriSteps : steps
   const featuresFeed = isAgri ? agriFeatures : features
@@ -468,12 +379,10 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
   const dashLabel = isAgri ? 'Open AgriBlock Dashboard' : 'Open GreenBlock Dashboard'
   const hasDash = typeof onOpenDashboard === 'function'
 
-  // Sync nav height to CSS var
   useEffect(() => {
     const shell = shellRef.current
     const nav = navRef.current
     if (!shell || !nav) return undefined
-
     const sync = () => {
       shell.style.setProperty('--nav-h', `${Math.ceil(nav.getBoundingClientRect().height) + 8}px`)
     }
@@ -484,7 +393,6 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
     return () => { window.removeEventListener('resize', sync); ro?.disconnect() }
   }, [variant])
 
-  // Scroll-reveal for cards
   useEffect(() => {
     const els = document.querySelectorAll('.step-card, .actor-card, .feature-item')
     if (pref) {
@@ -495,18 +403,17 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
       entries => entries.forEach(e => {
         if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)' }
       }),
-      { threshold: 0.08 }
+      { threshold: 0.06 }
     )
     els.forEach(el => {
       el.style.opacity = '0'
-      el.style.transform = 'translateY(20px)'
-      el.style.transition = 'opacity 0.55s ease, transform 0.55s ease'
+      el.style.transform = 'translateY(16px)'
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease'
       obs.observe(el)
     })
     return () => obs.disconnect()
   }, [pref, variant])
 
-  // Stat counter animation
   useEffect(() => {
     const els = document.querySelectorAll('.stat-num')
     if (pref) { els.forEach(el => { el.textContent = el.dataset.final || el.textContent }); return undefined }
@@ -530,7 +437,6 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
 
   return (
     <div ref={shellRef} className="landing-shell">
-      <div className="bg-grid" aria-hidden="true" />
 
       {/* ─── NAV ─── */}
       <nav ref={navRef} className="top-nav">
@@ -570,7 +476,6 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
                 <span
                   key={i}
                   className={`h1-line${i === 2 ? ' h1-accent' : ''}${i === 3 ? ' h1-dim' : ''}`}
-                  style={pref ? { opacity: 1 } : undefined}
                 >
                   {line}
                 </span>
@@ -584,7 +489,7 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
               <button type="button" className="btn-outline" disabled={!hasDash} onClick={() => onOpenDashboard?.()}>
                 {dashLabel}
               </button>
-              <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-outline btn-icon">
+              <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-outline">
                 <DocIcon /> {devpostLabel}
               </a>
             </div>
@@ -593,25 +498,7 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
           <div className="hero-right" aria-hidden="true">
             <TerminalFeed messages={termFeed} isAgriMode={isAgri} prefersReducedMotion={pref} />
           </div>
-
-          <div className="scroll-hint" aria-hidden="true">
-            <div className="scroll-line" />
-          </div>
         </section>
-
-        {/* ─── TICKER ─── */}
-        <div className="ticker">
-          <div className="ticker-track">
-            {[0, 1].flatMap(li =>
-              tick.map(item => (
-                <span className="ticker-item" key={`${li}-${item}`}>
-                  <span className="ticker-star">✦</span>
-                  {item}
-                </span>
-              ))
-            )}
-          </div>
-        </div>
 
         {/* ─── STATS ─── */}
         <div className="stats-bar">
@@ -647,26 +534,21 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
 
         {/* ─── PLATFORM FEATURES ─── */}
         <section id="features" className="features-section">
-          <div className="features-inner">
-            <div className="features-left">
-              <div className="section-eyebrow">Platform</div>
-              <h2 className="section-title">{platformTitle}</h2>
-              <p className="section-sub">{platformSub}</p>
-              <div className="feature-list">
-                {featuresFeed.map(f => (
-                  <div className="feature-item" key={f.title}>
-                    <div className="feature-icon-wrap">{renderFeatureIcon(f.icon)}</div>
-                    <div className="feature-text">
-                      <h4 className="feature-title">{f.title}</h4>
-                      <p>{f.description}</p>
-                    </div>
-                  </div>
-                ))}
+          <div className="section-head">
+            <div className="section-eyebrow">Platform</div>
+            <h2 className="section-title">{platformTitle}</h2>
+            <p className="section-sub">{platformSub}</p>
+          </div>
+          <div className="features-grid">
+            {featuresFeed.map(f => (
+              <div className="feature-item" key={f.title}>
+                <div className="feature-icon-wrap">{renderFeatureIcon(f.icon)}</div>
+                <div className="feature-text">
+                  <h4 className="feature-title">{f.title}</h4>
+                  <p>{f.description}</p>
+                </div>
               </div>
-            </div>
-            <div className="features-right" aria-hidden="true">
-              <BlockchainVisual isAgriMode={isAgri} prefersReducedMotion={pref} />
-            </div>
+            ))}
           </div>
         </section>
 
@@ -702,21 +584,19 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
 
         {/* ─── CTA ─── */}
         <section className="cta-section" id="cta">
-          <div className="cta-inner">
-            <div className="section-eyebrow section-eyebrow-center">Get Involved</div>
-            <h2 className="section-title cta-title">{ctaTitle}</h2>
-            <p className="section-sub cta-sub">{ctaSub}</p>
-            <div className="cta-actions">
-              <button type="button" className="btn-primary" disabled={!hasDash} onClick={() => onOpenDashboard?.()}>
-                {dashLabel}
-              </button>
-              <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-primary">
-                {devpostLabel}
-              </a>
-              <a href="mailto:anup@anupmazumdar.me" className="btn-outline">
-                Contact the Team →
-              </a>
-            </div>
+          <div className="section-eyebrow section-eyebrow-center">Get Involved</div>
+          <h2 className="section-title cta-title">{ctaTitle}</h2>
+          <p className="section-sub cta-sub">{ctaSub}</p>
+          <div className="cta-actions">
+            <button type="button" className="btn-primary" disabled={!hasDash} onClick={() => onOpenDashboard?.()}>
+              {dashLabel}
+            </button>
+            <a href={devpostHref} target="_blank" rel="noreferrer" className="btn-primary">
+              {devpostLabel}
+            </a>
+            <a href="mailto:anup@anupmazumdar.me" className="btn-outline">
+              Contact the Team →
+            </a>
           </div>
         </section>
 
