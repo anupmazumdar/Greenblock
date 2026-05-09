@@ -40,12 +40,12 @@ const features = [
 ]
 
 const actors = [
-  { icon: '🏛️', name: 'Government Bodies', role: 'Set national carbon baselines through democratic process. Deploy policy and enforce compliance via smart contracts.' },
-  { icon: '🏭', name: 'Corporations', role: 'Monitored via IoT sensors. Earn carbon credits for under-threshold performance. Purchase credits when limits are exceeded.' },
-  { icon: '👤', name: 'Citizens', role: 'Rewarded for eco-friendly behavior — from EV adoption to waste reduction. Build a personal endorsement score on-chain.' },
-  { icon: '🛡️', name: 'Insurance Companies', role: 'Access immutable endorsement scores to calculate premiums and enable transparent on-chain insurance products.' },
-  { icon: '📡', name: 'IoT Networks', role: 'Physical sensors feed verified, real-time environmental data onto the blockchain — eliminating self-reporting fraud at the source.' },
-  { icon: '⚖️', name: 'Regulators', role: 'Monitor compliance across the entire ecosystem through a transparent dashboard. Automated enforcement removes human bias.' },
+  { icon: 'government', name: 'Government Bodies', role: 'Set national carbon baselines through democratic process. Deploy policy and enforce compliance via smart contracts.' },
+  { icon: 'corporation', name: 'Corporations', role: 'Monitored via IoT sensors. Earn carbon credits for under-threshold performance. Purchase credits when limits are exceeded.' },
+  { icon: 'citizen', name: 'Citizens', role: 'Rewarded for eco-friendly behavior — from EV adoption to waste reduction. Build a personal endorsement score on-chain.' },
+  { icon: 'insurance', name: 'Insurance Companies', role: 'Access immutable endorsement scores to calculate premiums and enable transparent on-chain insurance products.' },
+  { icon: 'iot', name: 'IoT Networks', role: 'Physical sensors feed verified, real-time environmental data onto the blockchain — eliminating self-reporting fraud at the source.' },
+  { icon: 'regulator', name: 'Regulators', role: 'Monitor compliance across the entire ecosystem through a transparent dashboard. Automated enforcement removes human bias.' },
 ]
 
 const techTags = [
@@ -78,12 +78,12 @@ const agriFeatures = [
 ]
 
 const agriActors = [
-  { icon: '🚜', name: 'Farmers', role: 'Capture field activity, receive real-time recommendations, and improve yields with verifiable agronomic records.' },
-  { icon: '🏪', name: 'Buyers & Retailers', role: 'Procure produce with trusted provenance, quality history, and transparent farm compliance evidence.' },
-  { icon: '🧪', name: 'Agronomists', role: 'Monitor farm telemetry, validate interventions, and optimize crop plans using reliable historical data.' },
-  { icon: '🤝', name: 'Cooperatives', role: 'Coordinate shared infrastructure, benchmark outcomes, and improve farmer access to services and markets.' },
-  { icon: '🛡️', name: 'Insurers & Lenders', role: 'Use immutable operational histories to underwrite risk, price premiums, and expand agricultural financing.' },
-  { icon: '⚖️', name: 'Regulators', role: 'Verify sustainability and compliance metrics through auditable records without heavy manual inspections.' },
+  { icon: 'farmer', name: 'Farmers', role: 'Capture field activity, receive real-time recommendations, and improve yields with verifiable agronomic records.' },
+  { icon: 'buyer', name: 'Buyers & Retailers', role: 'Procure produce with trusted provenance, quality history, and transparent farm compliance evidence.' },
+  { icon: 'agronomist', name: 'Agronomists', role: 'Monitor farm telemetry, validate interventions, and optimize crop plans using reliable historical data.' },
+  { icon: 'cooperative', name: 'Cooperatives', role: 'Coordinate shared infrastructure, benchmark outcomes, and improve farmer access to services and markets.' },
+  { icon: 'insurance', name: 'Insurers & Lenders', role: 'Use immutable operational histories to underwrite risk, price premiums, and expand agricultural financing.' },
+  { icon: 'regulator', name: 'Regulators', role: 'Verify sustainability and compliance metrics through auditable records without heavy manual inspections.' },
 ]
 
 const agriTechTags = [
@@ -299,6 +299,35 @@ function renderFeatureIcon(icon) {
   }
 }
 
+function renderActorIcon(icon) {
+  const ph = 'var(--phosphor, #00FF8C)'
+  const s = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: ph, strokeWidth: 1.5, 'aria-hidden': true }
+  switch (icon) {
+    case 'government':
+      return <svg {...s}><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" /></svg>
+    case 'corporation':
+      return <svg {...s}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4" /></svg>
+    case 'citizen':
+      return <svg {...s}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+    case 'insurance':
+      return <svg {...s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+    case 'iot':
+      return <svg {...s}><path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><circle cx="12" cy="20" r="1" /></svg>
+    case 'regulator':
+      return <svg {...s}><path d="M12 3l1.88 5.79H20l-4.94 3.59 1.88 5.79L12 14.58l-4.94 3.59 1.88-5.79L4 8.79h6.12L12 3z" /></svg>
+    case 'farmer':
+      return <svg {...s}><path d="M3 17l3-9 5 4 5-4 3 9" /><path d="M12 2v5M7 12a5 5 0 0 0 10 0" /></svg>
+    case 'buyer':
+      return <svg {...s}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+    case 'agronomist':
+      return <svg {...s}><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4m0-8h10m0 0h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9m10-8v8" /></svg>
+    case 'cooperative':
+      return <svg {...s}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+    default:
+      return <svg {...s}><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg>
+  }
+}
+
 // ─── MOTION HOOK ───
 
 function usePrefersReducedMotion() {
@@ -325,6 +354,7 @@ function usePrefersReducedMotion() {
 export default function GreenBlockLanding({ variant = 'greenblock', onToggle, onOpenDashboard }) {
   const shellRef = useRef(null)
   const navRef = useRef(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const pref = usePrefersReducedMotion()
   const isAgri = variant === 'agriblock'
   const nextMode = isAgri ? 'greenblock' : 'agriblock'
@@ -444,20 +474,34 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
           <LogoHex />
           <span className="logo-text">{brand}<em>Block</em></span>
         </a>
-        <ul className="nav-links">
-          <li><a href="#how">How It Works</a></li>
-          <li><a href="#features">Platform</a></li>
-          <li><a href="#actors">Participants</a></li>
-          <li><a href="#tech">Technology</a></li>
+        <ul className={`nav-links${mobileOpen ? ' nav-links--open' : ''}`}>
+          <li><a href="#how" onClick={() => setMobileOpen(false)}>How It Works</a></li>
+          <li><a href="#features" onClick={() => setMobileOpen(false)}>Platform</a></li>
+          <li><a href="#actors" onClick={() => setMobileOpen(false)}>Participants</a></li>
+          <li><a href="#tech" onClick={() => setMobileOpen(false)}>Technology</a></li>
+          <li className="nav-mobile-only">
+            <button type="button" className="btn-ghost" onClick={() => { onToggle?.(nextMode); setMobileOpen(false) }}>
+              {isAgri ? 'Switch to GreenBlock' : 'Switch to AgriBlock'}
+            </button>
+          </li>
         </ul>
         <div className="nav-actions">
-          <button type="button" className="btn-ghost" onClick={() => onToggle?.(nextMode)}>
+          <button type="button" className="btn-ghost nav-desktop-only" onClick={() => onToggle?.(nextMode)}>
             {isAgri ? 'Switch to GreenBlock' : 'Switch to AgriBlock'}
           </button>
-          <button type="button" className="btn-ghost" disabled={!hasDash} onClick={() => onOpenDashboard?.()}>
-            {dashLabel}
-          </button>
           <a className="btn-nav-cta" href="#cta">Get Involved</a>
+          <button
+            type="button"
+            className="nav-hamburger"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen(v => !v)}
+          >
+            {mobileOpen
+              ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            }
+          </button>
         </div>
       </nav>
 
@@ -470,6 +514,12 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
               <span className="eyebrow-dot" aria-hidden="true" />
               {heroTag}
             </div>
+
+            <p className="hero-descriptor">
+              {isAgri
+                ? 'IoT-Powered Agricultural Traceability Platform'
+                : 'Blockchain Carbon Credit System · IoT-Powered'}
+            </p>
 
             <h1 className="hero-h1">
               {heroLines.map((line, i) => (
@@ -539,17 +589,18 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
             <h2 className="section-title">{platformTitle}</h2>
             <p className="section-sub">{platformSub}</p>
           </div>
-          <div className="features-grid">
-            {featuresFeed.map(f => (
-              <div className="feature-item" key={f.title}>
+          <ul className="features-list" role="list">
+            {featuresFeed.map((f, i) => (
+              <li className="feature-row feature-item" key={f.title}>
+                <span className="feature-num" aria-hidden="true">0{i + 1}</span>
                 <div className="feature-icon-wrap">{renderFeatureIcon(f.icon)}</div>
                 <div className="feature-text">
                   <h4 className="feature-title">{f.title}</h4>
                   <p>{f.description}</p>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         {/* ─── ACTORS ─── */}
@@ -562,7 +613,7 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
           <div className="actors-grid">
             {actorsFeed.map(a => (
               <article className="actor-card" key={a.name}>
-                <span className="actor-icon" aria-hidden="true">{a.icon}</span>
+                <div className="actor-icon-wrap">{renderActorIcon(a.icon)}</div>
                 <h3 className="actor-name">{a.name}</h3>
                 <p className="actor-role">{a.role}</p>
               </article>
@@ -572,9 +623,7 @@ export default function GreenBlockLanding({ variant = 'greenblock', onToggle, on
 
         {/* ─── TECHNOLOGY ─── */}
         <section id="tech" className="tech-section">
-          <div className="section-eyebrow">Technology</div>
-          <h2 className="section-title">Built on Proven Infrastructure</h2>
-          <p className="section-sub">{techSub}</p>
+          <div className="section-eyebrow tech-eyebrow-solo">Technology Stack</div>
           <div className="tech-tags">
             {techFeed.map(tag => (
               <span className="tech-tag" key={tag}>{tag}</span>

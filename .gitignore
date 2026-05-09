@@ -11,3 +11,5 @@ greenblock-backend/.env
 greenblock-frontend/.env
 .claude/
 notebooks/
+gstack/
+graphify-out/
