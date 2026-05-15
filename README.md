@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-GreenBlock ek ₹1,100 ke hardware se pura AgriTech ecosystem deta hai.
+GreenBlock ek ₹11,100 ke hardware se pura AgriTech ecosystem deta hai.
 Solo built by Anup Mazumdar | MCA Student, UEM Jaipur | Intern @ Briztech Infosystems
 
 ---
@@ -15,7 +15,7 @@ Solo built by Anup Mazumdar | MCA Student, UEM Jaipur | Intern @ Briztech Infosy
 - INA219 — Solar voltage/current sensor
 - Soil moisture sensor
 - Relay modules (irrigation control)
-- Total cost: ~₹1,100
+- Total cost: ~₹11,100
 
 ---
 
